@@ -3,15 +3,12 @@ import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-// 固定ユーザーID（UUIDでSupabaseのauth.uid()と同じもの）
-const USER_ID = "00000000-0000-0000-0000-000000000000";
-
-const CalendarEdit = ({ events, setEvents }) => {
+const CalendarEdit = ({ events, setEvents, userId }) => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const openNewEventModal = () => {
-    setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "", user_id: USER_ID });
+    setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
     setShowModal(true);
   };
 
@@ -19,7 +16,7 @@ const CalendarEdit = ({ events, setEvents }) => {
     if (!editingEvent.title) return;
 
     if (editingEvent.id) {
-      // --- 更新 ---
+      // 更新
       const { error } = await supabase
         .from("ScheduleList")
         .update({
@@ -30,27 +27,18 @@ const CalendarEdit = ({ events, setEvents }) => {
           summary: editingEvent.summary
         })
         .eq("id", editingEvent.id);
-
-      if (error) {
-        console.error("Failed to update event:", error);
-        return;
-      }
+      if (error) console.error("更新失敗:", error);
     } else {
-      // --- 新規追加 ---
+      // 追加
       const { data, error } = await supabase
         .from("ScheduleList")
-        .insert([{ ...editingEvent }])
-        .select(); // insert後に返す
-
-      if (error) {
-        console.error("Failed to insert event:", error);
-        return;
-      }
-
-      editingEvent.id = data[0].id; // id を反映
+        .insert([
+          { ...editingEvent, user_id: userId }
+        ])
+        .select();
+      if (error) console.error("追加失敗:", error);
     }
 
-    setEvents(await supabase.from("ScheduleList").select("*").order("date").order("time")); // 即時反映
     setEditingEvent(null);
     setShowModal(false);
   };
@@ -63,13 +51,7 @@ const CalendarEdit = ({ events, setEvents }) => {
       .from("ScheduleList")
       .delete()
       .eq("id", eventToDelete.id);
-
-    if (error) {
-      console.error("Failed to delete event:", error);
-      return;
-    }
-
-    setEvents(events.filter((_, i) => i !== idx));
+    if (error) console.error("削除失敗:", error);
   };
 
   return (
