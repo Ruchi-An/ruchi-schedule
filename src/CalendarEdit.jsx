@@ -41,11 +41,11 @@ const CalendarEdit = ({ userId }) => {
   const saveEvent = async () => {
     if (!editingEvent.title) return;
 
-    if (editingEvent.id) {
+    if (editingEvent.no) {
       const { error } = await supabase
         .from("ScheduleList")
         .update(editingEvent)
-        .eq("id", editingEvent.id);
+        .eq("no", editingEvent.no);
       if (error) console.error("Update failed:", error);
     } else {
       const { data, error } = await supabase
@@ -61,12 +61,12 @@ const CalendarEdit = ({ userId }) => {
 
   const deleteEvent = async (idx) => {
     const eventToDelete = events[idx];
-    if (!eventToDelete.id) return;
+    if (!eventToDelete.no) return;
 
     const { error } = await supabase
       .from("ScheduleList")
       .delete()
-      .eq("id", eventToDelete.id);
+      .eq("no", eventToDelete.no);
     if (error) console.error("Delete failed:", error);
   };
 
