@@ -1,11 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-const CalendarEdit = ({ events, setEvents, userId }) => {
+const CalendarEdit = ({ userId }) => {
+  const [events, setEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const fetchEvents = async () => {
+    const { data, error } = await supabase
+      .from("ScheduleList")
+      .select("*")
+      .eq("user_id", userId)
+      .order("date", { ascending: true });
+    if (error) console.error(error);
+    else setEvents(data || []);
+  };
+
+  useEffect(() => {
+    fetchEvents();
+
+    const channel = supabase
+      .channel("public:ScheduleList")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ScheduleList" },
+        () => fetchEvents()
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [userId]);
 
   const openNewEventModal = () => {
     setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
@@ -16,36 +42,17 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
     if (!editingEvent.title) return;
 
     if (editingEvent.id) {
-      // -----------------------------
-      // 更新: Supabase のテーブル名は "ScheduleList"
-      // -----------------------------
       const { error } = await supabase
         .from("ScheduleList")
-        .update({
-          date: editingEvent.date,
-          time: editingEvent.time,
-          title: editingEvent.title,
-          type: editingEvent.type,
-          summary: editingEvent.summary
-        })
+        .update(editingEvent)
         .eq("id", editingEvent.id);
-
-      if (error) console.error("更新失敗:", error);
-      else {
-        // ローカル state 更新
-        setEvents(events.map(e => (e.id === editingEvent.id ? editingEvent : e)));
-      }
+      if (error) console.error("Update failed:", error);
     } else {
-      // -----------------------------
-      // 追加
-      // -----------------------------
       const { data, error } = await supabase
         .from("ScheduleList")
-        .insert([{ ...editingEvent, user_id: userId }]) // ← user_id に固定 UUID
+        .insert([{ ...editingEvent, user_id: userId }])
         .select();
-
-      if (error) console.error("追加失敗:", error);
-      else setEvents([...events, data[0]]);
+      if (error) console.error("Insert failed:", error);
     }
 
     setEditingEvent(null);
@@ -60,9 +67,7 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
       .from("ScheduleList")
       .delete()
       .eq("id", eventToDelete.id);
-
-    if (error) console.error("削除失敗:", error);
-    else setEvents(events.filter((_, i) => i !== idx));
+    if (error) console.error("Delete failed:", error);
   };
 
   return (
@@ -77,14 +82,12 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
           }
         }}
       />
-
       <EventList
         events={events}
         onEdit={(idx) => { setEditingEvent({ ...events[idx] }); setShowModal(true); }}
         onDelete={deleteEvent}
         editable
       />
-
       <button
         onClick={openNewEventModal}
         className="fixed top-8 right-8 px-4 py-3 bg-cyan-400 rounded-full shadow-lg hover:bg-cyan-500 transition"

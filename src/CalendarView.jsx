@@ -3,44 +3,39 @@ import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-// props では userId を受け取るように統一
-const CalendarView = ({ userId }) => {
+const CalendarView = ({ user }) => {
   const [events, setEvents] = useState([]);
 
-  // -----------------------------
-  // Supabase から予定を取得
-  // -----------------------------
   const fetchEvents = async () => {
-    if (!userId) return;
-
+    if (!user) return;
     const { data, error } = await supabase
-      .from("ScheduleList")       // ← Supabase のテーブル名
+      .from("ScheduleList")
       .select("*")
-      .eq("user_id", userId)      // ← UUID 固定値
+      .eq("user_id", user.id)
       .order("date", { ascending: true });
-
-    if (error) console.error("Failed to fetch events:", error);
-    else setEvents(data);
+    if (error) console.error("Fetch events failed:", error);
+    else setEvents(data || []);
   };
 
   useEffect(() => {
     fetchEvents();
 
-    // -----------------------------
-    // Realtime 更新
-    // -----------------------------
-    const subscription = supabase
-      .from(`ScheduleList:user_id=eq.${userId}`) // ←ユーザー単位で購読
-      .on("*", payload => {
-        console.log("Realtime event:", payload);
-        fetchEvents(); // 変更があれば fetch して state 更新
-      })
+    const channel = supabase
+      .channel("public:ScheduleList")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ScheduleList" },
+        (payload) => {
+          console.log("Realtime payload:", payload);
+          fetchEvents();
+        }
+      )
       .subscribe();
 
     return () => {
-      supabase.removeSubscription(subscription);
+      supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [user]);
 
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto">
