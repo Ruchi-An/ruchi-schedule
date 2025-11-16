@@ -16,7 +16,9 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
     if (!editingEvent.title) return;
 
     if (editingEvent.id) {
-      // 更新
+      // -----------------------------
+      // 更新: Supabase のテーブル名は "ScheduleList"
+      // -----------------------------
       const { error } = await supabase
         .from("ScheduleList")
         .update({
@@ -27,16 +29,23 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
           summary: editingEvent.summary
         })
         .eq("id", editingEvent.id);
+
       if (error) console.error("更新失敗:", error);
+      else {
+        // ローカル state 更新
+        setEvents(events.map(e => (e.id === editingEvent.id ? editingEvent : e)));
+      }
     } else {
+      // -----------------------------
       // 追加
+      // -----------------------------
       const { data, error } = await supabase
         .from("ScheduleList")
-        .insert([
-          { ...editingEvent, user_id: userId }
-        ])
+        .insert([{ ...editingEvent, user_id: userId }]) // ← user_id に固定 UUID
         .select();
+
       if (error) console.error("追加失敗:", error);
+      else setEvents([...events, data[0]]);
     }
 
     setEditingEvent(null);
@@ -51,12 +60,13 @@ const CalendarEdit = ({ events, setEvents, userId }) => {
       .from("ScheduleList")
       .delete()
       .eq("id", eventToDelete.id);
+
     if (error) console.error("削除失敗:", error);
+    else setEvents(events.filter((_, i) => i !== idx));
   };
 
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto relative">
-
       <CalendarLayout
         events={events}
         onCellClick={(day) => {
