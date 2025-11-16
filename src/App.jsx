@@ -13,13 +13,13 @@ const App = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       const { data, error } = await supabase
-        .from("events")
+        .from("ScheduleList")
         .select("*")
         .order("date", { ascending: true })
         .order("time", { ascending: true });
 
       if (error) {
-        console.error("Error loading events:", error);
+        console.error("Error loading ScheduleList:", error);
       } else {
         setEvents(data);
       }
