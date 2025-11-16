@@ -1,13 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CalendarView from "./CalendarView.jsx";
 import CalendarEdit from "./CalendarEdit.jsx";
+import { supabase } from "./supabaseClient"; // ← 追加！
 
 const App = () => {
-  const [events, setEvents] = useState([
-    { date: "2025-11-14", time: "20:00", title: "テスト配信", type: "ゲーム", detail: "" },
-    { date: "2025-11-15", time: "18:00", title: "シナリオ遊び", type: "シナリオ", detail: "" },
-  ]);
+  const [events, setEvents] = useState([]);
+
+  // --------------------------
+  // Supabase からイベント取得
+  // --------------------------
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: true })
+        .order("time", { ascending: true });
+
+      if (error) {
+        console.error("Error loading events:", error);
+      } else {
+        setEvents(data);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   return (
     <Router>
@@ -25,7 +44,10 @@ const App = () => {
           <div className="w-full max-w-[1600px]">
             <Routes>
               <Route path="/" element={<CalendarView events={events} />} />
-              <Route path="/edit" element={<CalendarEdit events={events} setEvents={setEvents} />} />
+              <Route
+                path="/edit"
+                element={<CalendarEdit events={events} setEvents={setEvents} />}
+              />
             </Routes>
           </div>
         </main>
