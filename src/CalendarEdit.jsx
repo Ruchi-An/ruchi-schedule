@@ -18,7 +18,7 @@ const CalendarEdit = ({ events, setEvents }) => {
     if (!editingEvent.title) return;
 
     if (editingEvent.id) {
-      // --- 更新 ---
+      // 更新
       const { error } = await supabase
         .from("events")
         .update({
@@ -35,31 +35,30 @@ const CalendarEdit = ({ events, setEvents }) => {
         return;
       }
 
-      // ローカル state も更新
       setEvents(events.map(e => (e.id === editingEvent.id ? editingEvent : e)));
     } else {
-      // --- 新規追加 ---
+      // 新規追加
       const { data, error } = await supabase
         .from("events")
-        .insert([
-          {
-            date: editingEvent.date,
-            time: editingEvent.time,
-            title: editingEvent.title,
-            type: editingEvent.type,
-            summary: editingEvent.summary
-          }
-        ])
-        .select(); // insert 後にデータを返す
+        .insert([{
+          date: editingEvent.date,
+          time: editingEvent.time,
+          title: editingEvent.title,
+          type: editingEvent.type,
+          summary: editingEvent.summary
+        }])
+        .select();
 
       if (error) {
         console.error("Failed to insert event:", error);
         return;
       }
 
-      setEvents([...events, data[0]]); // Supabase から返ってきた id を反映
+      // Supabase から返ってきた id を反映
+      setEvents([...events, data[0]]);
     }
 
+    // モーダルを閉じる
     setEditingEvent(null);
     setShowModal(false);
   };
