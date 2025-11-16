@@ -3,18 +3,20 @@ import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-const CalendarEdit = ({ events, setEvents, user }) => {
+// 固定ユーザーID（UUIDでSupabaseのauth.uid()と同じもの）
+const USER_ID = "00000000-0000-0000-0000-000000000000";
+
+const CalendarEdit = ({ events, setEvents }) => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const openNewEventModal = () => {
-    setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
+    setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "", user_id: USER_ID });
     setShowModal(true);
   };
 
   const saveEvent = async () => {
     if (!editingEvent.title) return;
-    if (!user) return;
 
     if (editingEvent.id) {
       // --- 更新 ---
@@ -25,7 +27,7 @@ const CalendarEdit = ({ events, setEvents, user }) => {
           time: editingEvent.time,
           title: editingEvent.title,
           type: editingEvent.type,
-          summary: editingEvent.summary,
+          summary: editingEvent.summary
         })
         .eq("id", editingEvent.id);
 
@@ -33,30 +35,22 @@ const CalendarEdit = ({ events, setEvents, user }) => {
         console.error("Failed to update event:", error);
         return;
       }
-
-      setEvents(events.map(e => (e.id === editingEvent.id ? editingEvent : e)));
     } else {
       // --- 新規追加 ---
       const { data, error } = await supabase
         .from("ScheduleList")
-        .insert([{
-          date: editingEvent.date,
-          time: editingEvent.time,
-          title: editingEvent.title,
-          type: editingEvent.type,
-          summary: editingEvent.summary,
-          user_id: user.id  // ここでログイン中の UID をセット
-        }])
-        .select();
+        .insert([{ ...editingEvent }])
+        .select(); // insert後に返す
 
       if (error) {
         console.error("Failed to insert event:", error);
         return;
       }
 
-      setEvents([...events, data[0]]);
+      editingEvent.id = data[0].id; // id を反映
     }
 
+    setEvents(await supabase.from("ScheduleList").select("*").order("date").order("time")); // 即時反映
     setEditingEvent(null);
     setShowModal(false);
   };
@@ -80,6 +74,7 @@ const CalendarEdit = ({ events, setEvents, user }) => {
 
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto relative">
+
       <CalendarLayout
         events={events}
         onCellClick={(day) => {
@@ -90,12 +85,14 @@ const CalendarEdit = ({ events, setEvents, user }) => {
           }
         }}
       />
+
       <EventList
         events={events}
         onEdit={(idx) => { setEditingEvent({ ...events[idx] }); setShowModal(true); }}
         onDelete={deleteEvent}
         editable
       />
+
       <button
         onClick={openNewEventModal}
         className="fixed top-8 right-8 px-4 py-3 bg-cyan-400 rounded-full shadow-lg hover:bg-cyan-500 transition"
