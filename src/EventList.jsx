@@ -1,6 +1,7 @@
 import React from "react";
 
-const EventList = ({ events = [], onDelete, onEdit, editable = false }) => {
+const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
+  // 日付順ソート（未定は最後）
   const sortedEvents = [...events].sort((a, b) => {
     const hasDateA = a.date && a.date.trim() !== "";
     const hasDateB = b.date && b.date.trim() !== "";
@@ -23,20 +24,34 @@ const EventList = ({ events = [], onDelete, onEdit, editable = false }) => {
           <p className="text-gray-400">イベントはまだありません</p>
         ) : (
           <ul className="space-y-3">
-            {sortedEvents.map((ev, idx) => (
-              <li key={idx} className="bg-indigo-800/40 p-3 rounded flex justify-between items-start">
+            {sortedEvents.map((ev) => (
+              <li key={ev.no} className="bg-indigo-800/40 p-3 rounded flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-white font-bold">{ev.date || "未定"} {ev.time || ""}</span>
-                    <span className="text-cyan-300">{ev.title} <span className="text-gray-300">[{ev.type}]</span></span>
+                    <span className="text-white font-bold">
+                      {ev.date || "未定"} {ev.time || ""}
+                    </span>
+                    <span className="text-cyan-300">
+                      {ev.title} <span className="text-gray-300">[{ev.type}]</span>
+                    </span>
                   </div>
-                  {ev.detail && <div className="text-gray-300 mt-2 text-sm break-words">{ev.detail}</div>}
+                  {ev.summary && <div className="text-gray-300 mt-2 text-sm break-words">{ev.summary}</div>}
                 </div>
 
                 {editable && (
                   <div className="flex flex-col gap-2 ml-4">
-                    <button onClick={() => onEdit && onEdit(ev.no)} className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500">編集</button>
-                    <button onClick={() => onDelete && onDelete(ev.no)} className="px-2 py-1 bg-red-500 rounded hover:bg-red-600">削除</button>
+                    <button
+                      onClick={() => onEdit && onEdit(ev.no)}
+                      className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
+                    >
+                      編集
+                    </button>
+                    <button
+                      onClick={() => onDelete && onDelete(ev.no)}
+                      className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
+                    >
+                      削除
+                    </button>
                   </div>
                 )}
               </li>

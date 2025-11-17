@@ -8,19 +8,22 @@ const CalendarEdit = ({ userId }) => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  // DB からイベント取得
   const fetchEvents = async () => {
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: true });
-    if (error) console.error(error);
+
+    if (error) console.error("Fetch failed:", error);
     else setEvents(data || []);
   };
 
   useEffect(() => {
     fetchEvents();
 
+    // Realtime チャンネル登録
     const channel = supabase
       .channel("public:schedule_list")
       .on(
@@ -33,11 +36,13 @@ const CalendarEdit = ({ userId }) => {
     return () => supabase.removeChannel(channel);
   }, [userId]);
 
+  // 新規イベントモーダル開く
   const openNewEventModal = () => {
     setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
     setShowModal(true);
   };
 
+  // 保存処理（新規／編集両対応）
   const saveEvent = async () => {
     if (!editingEvent.title) return;
 
@@ -56,7 +61,7 @@ const CalendarEdit = ({ userId }) => {
         const { error } = await supabase
           .from("schedule_list")
           .update(payload)
-          .eq("no", editingEvent.no);
+          .eq("no", editingEvent.no.toString()); // ← bigint を文字列で比較
         if (error) throw error;
       } else {
         // 新規
@@ -69,12 +74,13 @@ const CalendarEdit = ({ userId }) => {
 
       setEditingEvent(null);
       setShowModal(false);
-      fetchEvents();
+      fetchEvents(); // 反映
     } catch (err) {
       console.error("Save failed:", err);
     }
   };
 
+  // 削除処理
   const deleteEvent = async (eventNo) => {
     if (!eventNo) return;
 
@@ -82,15 +88,13 @@ const CalendarEdit = ({ userId }) => {
       const { data, error } = await supabase
         .from("schedule_list")
         .delete()
-        .eq("no", eventNo)
-        .select();  // ← ここで削除された行を返す
+        .eq("no", eventNo.toString()) // ← bigint を文字列で比較
+        .select();
 
       if (error) throw error;
 
       console.log("Deleted:", data);
-
-      // 削除後に即反映
-      fetchEvents();
+      fetchEvents(); // 反映
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -103,7 +107,7 @@ const CalendarEdit = ({ userId }) => {
         onCellClick={(day) => {
           const eventForDay = events.find(e => e.date === day.format("YYYY-MM-DD"));
           if (eventForDay) {
-            setEditingEvent({ ...eventForDay }); // no を含む
+            setEditingEvent({ ...eventForDay });
             setShowModal(true);
           }
         }}
@@ -111,12 +115,11 @@ const CalendarEdit = ({ userId }) => {
 
       <EventList
         events={events}
-        onEdit={(evNo) => {
-          const ev = events.find(e => e.no === evNo);
-          if (ev) {
-            setEditingEvent({ ...ev }); // no を含む
-            setShowModal(true);
-          }
+        onEdit={(no) => {
+          const ev = events.find(e => e.no.toString() === no.toString());
+          if (!ev) return;
+          setEditingEvent({ ...ev });
+          setShowModal(true);
         }}
         onDelete={deleteEvent}
         editable
@@ -167,12 +170,17 @@ const CalendarEdit = ({ userId }) => {
               placeholder="詳細"
               className="p-2 rounded bg-gray-700 text-white"
             />
-
             <div className="flex justify-between mt-2">
-              <button onClick={saveEvent} className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition">
+              <button
+                onClick={saveEvent}
+                className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition"
+              >
                 保存
               </button>
-              <button onClick={() => setShowModal(false)} className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition"
+              >
                 キャンセル
               </button>
             </div>

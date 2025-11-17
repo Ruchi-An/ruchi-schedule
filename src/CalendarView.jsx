@@ -1,42 +1,39 @@
-import React, { useEffect, useState } from "react";
-import CalendarLayout from "./CalendarLayout.jsx";
-import EventList from "./EventList.jsx";
-import { supabase } from "./supabaseClient";
+import React from "react";
 
-const CalendarView = ({ userId }) => {
-  const [events, setEvents] = useState([]);
-
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from("schedule_list")
-      .select("*")
-      .eq("user_id", userId)
-      .order("date", { ascending: true });
-    if (error) console.error("Fetch events failed:", error);
-    else setEvents(data || []);
-  };
-
-  useEffect(() => {
-    fetchEvents();
-
-    const channel = supabase
-      .channel("public:schedule_list")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "schedule_list" },
-        () => fetchEvents()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId]);
-
+const CalendarView = ({ events, onEdit, onDelete }) => {
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto">
-      <CalendarLayout events={events} />
-      <EventList events={events} editable={false} />
+    <div className="grid grid-cols-7 gap-2 p-4 bg-gray-900 rounded-xl text-white">
+      {events.length === 0 && <div className="col-span-7 text-center py-4">予定はありません</div>}
+
+      {events.map((ev) => (
+        <div
+          key={ev.no}
+          className="bg-indigo-800/50 rounded-lg p-2 flex flex-col gap-1 shadow-md hover:shadow-lg transition"
+        >
+          <div className="flex justify-between items-center">
+            <span className="font-semibold">{ev.title}</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => onEdit && onEdit(ev.no)}
+                className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
+              >
+                編集
+              </button>
+              <button
+                onClick={() => onDelete && onDelete(ev.no)}
+                className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
+              >
+                削除
+              </button>
+            </div>
+          </div>
+          <div className="text-xs text-gray-300">
+            {ev.date ? `${ev.date} ${ev.time || ""}` : "日時未設定"}
+          </div>
+          {ev.type && <div className="text-xs text-cyan-300">{ev.type}</div>}
+          {ev.summary && <div className="text-xs text-gray-400 truncate">{ev.summary}</div>}
+        </div>
+      ))}
     </div>
   );
 };
