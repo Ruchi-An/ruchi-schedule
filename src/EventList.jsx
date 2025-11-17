@@ -41,13 +41,13 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
                 {editable && (
                   <div className="flex flex-col gap-2 ml-4">
                     <button
-                      onClick={() => onEdit && onEdit(ev.no)}
+                      onClick={() => onEdit?.(ev.no)} // ev.no を引数として渡す
                       className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
                     >
                       編集
                     </button>
                     <button
-                      onClick={() => onDelete && onDelete(ev.no)}
+                      onClick={() => onDelete?.(ev.no)} // ev.no を引数として渡す
                       className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
                     >
                       削除
