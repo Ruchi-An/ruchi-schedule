@@ -9,7 +9,7 @@ const CalendarView = ({ user }) => {
   const fetchEvents = async () => {
     if (!user) return;
     const { data, error } = await supabase
-      .from("ScheduleList")
+      .from("schedule_list")
       .select("*")
       .eq("user_id", user.id)
       .order("date", { ascending: true });
@@ -21,10 +21,10 @@ const CalendarView = ({ user }) => {
     fetchEvents();
 
     const channel = supabase
-      .channel("public:ScheduleList")
+      .channel("public:schedule_list")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ScheduleList" },
+        { event: "*", schema: "public", table: "schedule_list" },
         (payload) => {
           console.log("Realtime payload:", payload);
           fetchEvents();

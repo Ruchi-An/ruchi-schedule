@@ -10,7 +10,7 @@ const CalendarEdit = ({ userId }) => {
 
   const fetchEvents = async () => {
     const { data, error } = await supabase
-      .from("ScheduleList")
+      .from("schedule_list")
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: true });
@@ -22,10 +22,10 @@ const CalendarEdit = ({ userId }) => {
     fetchEvents();
 
     const channel = supabase
-      .channel("public:ScheduleList")
+      .channel("public:schedule_list")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ScheduleList" },
+        { event: "*", schema: "public", table: "schedule_list" },
         () => fetchEvents()
       )
       .subscribe();
@@ -43,13 +43,13 @@ const CalendarEdit = ({ userId }) => {
 
     if (editingEvent.no) {
       const { error } = await supabase
-        .from("ScheduleList")
+        .from("schedule_list")
         .update(editingEvent)
         .eq("no", editingEvent.no);
       if (error) console.error("Update failed:", error);
     } else {
       const { data, error } = await supabase
-        .from("ScheduleList")
+        .from("schedule_list")
         .insert([{ ...editingEvent, user_id: userId }])
         .select();
       if (error) console.error("Insert failed:", error);
@@ -64,7 +64,7 @@ const CalendarEdit = ({ userId }) => {
     if (!eventToDelete.no) return;
 
     const { error } = await supabase
-      .from("ScheduleList")
+      .from("schedule_list")
       .delete()
       .eq("no", eventToDelete.no);
     if (error) console.error("Delete failed:", error);

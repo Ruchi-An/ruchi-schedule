@@ -13,7 +13,7 @@ const App = () => {
   // Supabase から取得
   const fetchEvents = async () => {
     const { data, error } = await supabase
-      .from("ScheduleList")
+      .from("schedule_list")
       .select("*")
       .eq("user_id", USER_ID)
       .order("date", { ascending: true });
@@ -26,10 +26,10 @@ const App = () => {
 
     // Realtime
     const channel = supabase
-      .channel("public:ScheduleList")
+      .channel("public:schedule_list")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ScheduleList" },
+        { event: "*", schema: "public", table: "schedule_list" },
         (payload) => {
           console.log("Realtime payload:", payload);
           fetchEvents();
