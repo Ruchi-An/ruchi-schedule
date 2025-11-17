@@ -1,42 +1,29 @@
-// CalendarEdit.jsx
 import React, { useState, useEffect } from "react";
 import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
+
+const TEST_USER_ID = "11111111-1111-1111-1111-111111111111"; // テスト用固定 UUID
 
 const CalendarEdit = () => {
   const [events, setEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Supabase Auth のユーザー情報
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // ログインユーザー取得
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user) setUser(data.user);
-    };
-    getUser();
-  }, []);
-
+  // イベント一覧取得
   const fetchEvents = async () => {
-    if (!user) return;
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
-      .eq("user_id", user.id)
       .order("date", { ascending: true });
     if (error) console.error(error);
     else setEvents(data || []);
   };
 
   useEffect(() => {
-    if (!user) return;
     fetchEvents();
 
-    // Realtime チャンネル
+    // Realtime 監視
     const channel = supabase
       .channel("public:schedule_list")
       .on(
@@ -47,24 +34,19 @@ const CalendarEdit = () => {
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [user]);
+  }, []);
 
+  // 新規イベントモーダル
   const openNewEventModal = () => {
     setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
     setShowModal(true);
   };
 
-  const TEST_USER_ID = "11111111-1111-1111-1111-111111111111"; // テスト用固定 UUID
-
+  // 保存処理（固定 UUID）
   const saveEvent = async () => {
     if (!editingEvent.title) return;
-    if (!user) {
-      alert("ユーザーが取得できていません。ログインしてください。");
-      return;
-    }
 
     if (editingEvent.no) {
-      // 更新
       const { error } = await supabase
         .from("schedule_list")
         .update({
@@ -73,13 +55,12 @@ const CalendarEdit = () => {
           title: editingEvent.title,
           type: editingEvent.type,
           summary: editingEvent.summary,
-          user_id: TEST_USER_ID, // ←固定 UUID
+          user_id: TEST_USER_ID,
         })
         .eq("no", editingEvent.no);
       if (error) console.error("Update failed:", error);
     } else {
-      // 新規追加
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("schedule_list")
         .insert([{
           date: editingEvent.date,
@@ -87,7 +68,7 @@ const CalendarEdit = () => {
           title: editingEvent.title,
           type: editingEvent.type,
           summary: editingEvent.summary,
-          user_id: TEST_USER_ID, // ←固定 UUID
+          user_id: TEST_USER_ID,
         }])
         .select();
       if (error) console.error("Insert failed:", error);
@@ -97,6 +78,7 @@ const CalendarEdit = () => {
     setShowModal(false);
   };
 
+  // 削除処理
   const deleteEvent = async (idx) => {
     const eventToDelete = events[idx];
     if (!eventToDelete.no) return;
