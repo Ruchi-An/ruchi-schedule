@@ -1,37 +1,57 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import CalendarView from "./CalendarView.jsx";
-import CalendarEdit from "./CalendarEdit.jsx";
+import React, { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
-import bgImg from './assets/okumono_neonstar21.png';
+import CalendarView from "./CalendarView";
+import CalendarEdit from "./CalendarEdit";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const App = () => {
-  const USER_ID = "11111111-1111-1111-1111-111111111111"; // 固定UUID
-  const [user] = useState({ id: USER_ID }); // CalendarView / Edit に渡す
   const [events, setEvents] = useState([]);
+  const [user, setUser] = useState(null);
 
-  // Supabase から取得
+  // ① ログイン状態取得
+  useEffect(() => {
+    const session = supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+  }, []);
+
+  // ② DB から全イベント取得
   const fetchEvents = async () => {
+    if (!user) return;
+
     const { data, error } = await supabase
-      .from("ScheduleList")
+      .from("schedule_list")
       .select("*")
-      .eq("user_id", USER_ID)
-      .order("date", { ascending: true });
-    if (error) console.error("Fetch failed:", error);
-    else setEvents(data || []);
+      .eq("user_id", user.id)
+      .order("date", { ascending: true })
+      .order("time", { ascending: true });
+
+    if (!error) setEvents(data);
   };
 
+  // ③ user が読み込まれたら events を取得
   useEffect(() => {
-    fetchEvents();
+    if (user) fetchEvents();
+  }, [user]);
 
-    // Realtime
+  // ④ Realtime 設定（唯一のチャンネル）
+  useEffect(() => {
+    if (!user) return;
+
     const channel = supabase
-      .channel("public:ScheduleList")
+      .channel("schedule_list_changes")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ScheduleList" },
-        (payload) => {
-          console.log("Realtime payload:", payload);
+        {
+          event: "*",
+          schema: "public",
+          table: "schedule_list",
+        },
+        () => {
           fetchEvents();
         }
       )
@@ -40,28 +60,14 @@ const App = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   return (
     <Router>
-      <div
-        className="min-h-screen bg-cover bg-center bg-fixed text-white"
-        style={{ backgroundImage: `url(${bgImg})` }}
-      >
-        <header className="bg-indigo-900/30 backdrop-blur-xl p-6 flex justify-center items-center shadow-[0_0_25px_#000A]">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-widest drop-shadow-[0_0_20px_#00ffff]">
-            Ruchi Schedule
-          </h1>
-        </header>
-        <main className="p-4 flex justify-center">
-          <div className="w-full max-w-[1600px]">
-            <Routes>
-              <Route path="/" element={<CalendarView user={user} />} />
-              <Route path="/edit" element={<CalendarEdit userId={USER_ID} />} />
-            </Routes>
-          </div>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/" element={<CalendarView events={events} />} />
+        <Route path="/edit" element={<CalendarEdit events={events} userId={user?.id} />} />
+      </Routes>
     </Router>
   );
 };
