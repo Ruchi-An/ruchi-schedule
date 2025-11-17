@@ -3,13 +3,14 @@ import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-const CalendarView = () => {
+const CalendarView = ({ userId }) => {
   const [events, setEvents] = useState([]);
 
   const fetchEvents = async () => {
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
+      .eq("user_id", userId)
       .order("date", { ascending: true });
     if (error) console.error("Fetch events failed:", error);
     else setEvents(data || []);
@@ -22,20 +23,15 @@ const CalendarView = () => {
       .channel("public:schedule_list")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "schedule_list",
-        },
-        (payload) => {
-          console.log("Realtime payload:", payload);
-          fetchEvents(); // 変更があったら再取得
-        }
+        { event: "*", schema: "public", table: "schedule_list" },
+        () => fetchEvents()
       )
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
-  }, []);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto">

@@ -6,41 +6,7 @@ import { supabase } from "./supabaseClient";
 import bgImg from './assets/okumono_neonstar21.png';
 
 const App = () => {
-  const USER_ID = "11111111-1111-1111-1111-111111111111"; // 固定UUID
-  const [user] = useState({ id: USER_ID }); // CalendarView / Edit に渡す
-  const [events, setEvents] = useState([]);
-
-  // Supabase から取得
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from("schedule_list")
-      .select("*")
-      .eq("user_id", USER_ID)
-      .order("date", { ascending: true });
-    if (error) console.error("Fetch failed:", error);
-    else setEvents(data || []);
-  };
-
-  useEffect(() => {
-    fetchEvents();
-
-    // Realtime
-    const channel = supabase
-      .channel("public:schedule_list")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "schedule_list" },
-        (payload) => {
-          console.log("Realtime payload:", payload);
-          fetchEvents();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const FIXED_USER_ID = "11111111-1111-1111-1111-111111111111";
 
   return (
     <Router>
@@ -56,8 +22,8 @@ const App = () => {
         <main className="p-4 flex justify-center">
           <div className="w-full max-w-[1600px]">
             <Routes>
-              <Route path="/" element={<CalendarView user={user} />} />
-              <Route path="/edit" element={<CalendarEdit userId={USER_ID} />} />
+              <Route path="/" element={<CalendarView userId={FIXED_USER_ID} />} />
+              <Route path="/edit" element={<CalendarEdit userId={FIXED_USER_ID} />} />
             </Routes>
           </div>
         </main>

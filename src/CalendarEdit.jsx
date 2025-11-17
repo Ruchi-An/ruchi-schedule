@@ -1,35 +1,18 @@
-// CalendarEdit.jsx
 import React, { useState, useEffect } from "react";
 import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
 
-const CalendarEdit = () => {
+const CalendarEdit = ({ userId }) => {
   const [events, setEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // 現在ログインしているユーザーを取得
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error(error);
-        alert("ログインしてください");
-        return;
-      }
-      setCurrentUser(user);
-    };
-    fetchUser();
-  }, []);
 
   const fetchEvents = async () => {
-    if (!currentUser) return;
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
-      .eq("user_id", currentUser.id)
+      .eq("user_id", userId)
       .order("date", { ascending: true });
     if (error) console.error(error);
     else setEvents(data || []);
@@ -38,7 +21,6 @@ const CalendarEdit = () => {
   useEffect(() => {
     fetchEvents();
 
-    if (!currentUser) return;
     const channel = supabase
       .channel("public:schedule_list")
       .on(
@@ -48,10 +30,8 @@ const CalendarEdit = () => {
       )
       .subscribe();
 
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [currentUser]);
+    return () => supabase.removeChannel(channel);
+  }, [userId]);
 
   const openNewEventModal = () => {
     setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
@@ -60,30 +40,17 @@ const CalendarEdit = () => {
 
   const saveEvent = async () => {
     if (!editingEvent.title) return;
-    if (!currentUser) {
-      alert("ログインしてください");
-      return;
-    }
-
-    const payload = {
-      date: editingEvent.date,
-      time: editingEvent.time,
-      title: editingEvent.title,
-      type: editingEvent.type,
-      summary: editingEvent.summary,
-      user_id: currentUser.id,
-    };
 
     if (editingEvent.no) {
       const { error } = await supabase
         .from("schedule_list")
-        .update(payload)
+        .update(editingEvent)
         .eq("no", editingEvent.no);
       if (error) console.error("Update failed:", error);
     } else {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("schedule_list")
-        .insert([payload])
+        .insert([{ ...editingEvent, user_id: userId }])
         .select();
       if (error) console.error("Insert failed:", error);
     }
