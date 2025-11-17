@@ -79,13 +79,17 @@ const CalendarEdit = ({ userId }) => {
     if (!eventNo) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("schedule_list")
         .delete()
-        .eq("no", eventNo);
+        .eq("no", eventNo)
+        .select();  // ← ここで削除された行を返す
 
       if (error) throw error;
 
+      console.log("Deleted:", data);
+
+      // 削除後に即反映
       fetchEvents();
     } catch (err) {
       console.error("Delete failed:", err);
