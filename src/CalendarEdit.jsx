@@ -66,9 +66,10 @@ const CalendarEdit = ({ userId }) => {
           .select();
         if (error) throw error;
       }
+
       setEditingEvent(null);
       setShowModal(false);
-      fetchEvents(); // 反映
+      fetchEvents();
     } catch (err) {
       console.error("Save failed:", err);
     }
@@ -85,7 +86,6 @@ const CalendarEdit = ({ userId }) => {
 
       if (error) throw error;
 
-      // 削除後に即反映
       fetchEvents();
     } catch (err) {
       console.error("Delete failed:", err);
@@ -99,17 +99,25 @@ const CalendarEdit = ({ userId }) => {
         onCellClick={(day) => {
           const eventForDay = events.find(e => e.date === day.format("YYYY-MM-DD"));
           if (eventForDay) {
-            setEditingEvent({ ...eventForDay });
+            setEditingEvent({ ...eventForDay }); // no を含む
             setShowModal(true);
           }
         }}
       />
+
       <EventList
         events={events}
-        onEdit={(idx) => { setEditingEvent({ ...events[idx] }); setShowModal(true); }}
+        onEdit={(evNo) => {
+          const ev = events.find(e => e.no === evNo);
+          if (ev) {
+            setEditingEvent({ ...ev }); // no を含む
+            setShowModal(true);
+          }
+        }}
         onDelete={deleteEvent}
         editable
       />
+
       <button
         onClick={openNewEventModal}
         className="fixed top-8 right-8 px-4 py-3 bg-cyan-400 rounded-full shadow-lg hover:bg-cyan-500 transition"
@@ -120,18 +128,49 @@ const CalendarEdit = ({ userId }) => {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
           <div className="bg-indigo-900/30 backdrop-blur-xl p-6 rounded-2xl w-96 flex flex-col gap-4">
-            <input type="date" value={editingEvent.date} onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })} className="p-2 rounded bg-gray-700 text-white" />
-            <input type="time" value={editingEvent.time} onChange={e => setEditingEvent({ ...editingEvent, time: e.target.value })} className="p-2 rounded bg-gray-700 text-white" />
-            <input type="text" value={editingEvent.title} onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })} placeholder="タイトル" className="p-2 rounded bg-gray-700 text-white" />
-            <select value={editingEvent.type} onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value })} className="p-2 rounded bg-gray-700 text-white">
+            <input
+              type="date"
+              value={editingEvent.date}
+              onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })}
+              className="p-2 rounded bg-gray-700 text-white"
+            />
+            <input
+              type="time"
+              value={editingEvent.time}
+              onChange={e => setEditingEvent({ ...editingEvent, time: e.target.value })}
+              className="p-2 rounded bg-gray-700 text-white"
+            />
+            <input
+              type="text"
+              value={editingEvent.title}
+              onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })}
+              placeholder="タイトル"
+              className="p-2 rounded bg-gray-700 text-white"
+            />
+            <select
+              value={editingEvent.type}
+              onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value })}
+              className="p-2 rounded bg-gray-700 text-white"
+            >
               <option value="ゲーム">ゲーム</option>
               <option value="シナリオ">シナリオ</option>
               <option value="リアル">リアル</option>
             </select>
-            <input type="text" value={editingEvent.summary} onChange={e => setEditingEvent({ ...editingEvent, summary: e.target.value })} placeholder="詳細" className="p-2 rounded bg-gray-700 text-white" />
+            <input
+              type="text"
+              value={editingEvent.summary}
+              onChange={e => setEditingEvent({ ...editingEvent, summary: e.target.value })}
+              placeholder="詳細"
+              className="p-2 rounded bg-gray-700 text-white"
+            />
+
             <div className="flex justify-between mt-2">
-              <button onClick={saveEvent} className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition">保存</button>
-              <button onClick={() => setShowModal(false)} className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition">キャンセル</button>
+              <button onClick={saveEvent} className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition">
+                保存
+              </button>
+              <button onClick={() => setShowModal(false)} className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition">
+                キャンセル
+              </button>
             </div>
           </div>
         </div>
