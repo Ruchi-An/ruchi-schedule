@@ -15,6 +15,8 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
     return dateA - dateB;
   });
 
+  console.log("EventList received events:", events);
+
   return (
     <div className="w-full">
       <div className="bg-indigo-900/25 backdrop-blur-xl p-4 rounded-2xl">
@@ -38,22 +40,22 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
                   {ev.summary && <div className="text-gray-300 mt-2 text-sm break-words">{ev.summary}</div>}
                 </div>
 
-                {editable && (
-                  <div className="flex flex-col gap-2 ml-4">
-                    <button
-                      onClick={() => onEdit?.(ev.no)} // ev.no を引数として渡す
-                      className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => onDelete?.(ev.no)} // ev.no を引数として渡す
-                      className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
-                    >
-                      削除
-                    </button>
-                  </div>
-                )}
+{editable && (
+  <div className="flex flex-col gap-2 ml-4">
+    <button
+      onClick={() => onEdit && onEdit(ev.no)}
+      className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
+    >
+      編集
+    </button>
+    <button
+      onClick={() => onDelete && onDelete(ev.no)}
+      className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
+    >
+      削除
+    </button>
+  </div>
+)}
               </li>
             ))}
           </ul>

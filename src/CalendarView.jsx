@@ -33,6 +33,8 @@ const CalendarView = ({ userId }) => {
     };
   }, [userId]);
 
+  console.log("CalendarView events:", events);
+
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto">
       <CalendarLayout events={events} />

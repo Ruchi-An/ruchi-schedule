@@ -23,7 +23,7 @@ const CalendarEdit = ({ userId }) => {
   useEffect(() => {
     fetchEvents();
 
-    // Realtime チャンネル登録
+    // Realtime チャンネル登録（最小限）
     const channel = supabase
       .channel("public:schedule_list")
       .on(
@@ -52,7 +52,7 @@ const CalendarEdit = ({ userId }) => {
       title: editingEvent.title,
       type: editingEvent.type,
       summary: editingEvent.summary || null,
-      user_id: userId
+      user_id: userId,
     };
 
     try {
@@ -61,7 +61,7 @@ const CalendarEdit = ({ userId }) => {
         const { error } = await supabase
           .from("schedule_list")
           .update(payload)
-          .eq("no", editingEvent.no.toString()); // ← bigint を文字列で比較
+          .eq("no", editingEvent.no);
         if (error) throw error;
       } else {
         // 新規
@@ -74,7 +74,7 @@ const CalendarEdit = ({ userId }) => {
 
       setEditingEvent(null);
       setShowModal(false);
-      fetchEvents(); // 反映
+      fetchEvents(); // 即反映
     } catch (err) {
       console.error("Save failed:", err);
     }
@@ -88,13 +88,12 @@ const CalendarEdit = ({ userId }) => {
       const { data, error } = await supabase
         .from("schedule_list")
         .delete()
-        .eq("no", eventNo.toString()) // ← bigint を文字列で比較
-        .select();
+        .eq("no", eventNo)
+        .select(); // これで削除したレコードが返る
 
       if (error) throw error;
 
-      console.log("Deleted:", data);
-      fetchEvents(); // 反映
+      fetchEvents(); // 即反映
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -116,7 +115,7 @@ const CalendarEdit = ({ userId }) => {
       <EventList
         events={events}
         onEdit={(no) => {
-          const ev = events.find(e => e.no.toString() === no.toString());
+          const ev = events.find(e => e.no === no);
           if (!ev) return;
           setEditingEvent({ ...ev });
           setShowModal(true);
