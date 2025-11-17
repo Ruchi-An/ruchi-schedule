@@ -41,33 +41,55 @@ const CalendarEdit = ({ userId }) => {
   const saveEvent = async () => {
     if (!editingEvent.title) return;
 
-    if (editingEvent.no) {
-      const { error } = await supabase
-        .from("schedule_list")
-        .update(editingEvent)
-        .eq("no", editingEvent.no);
-      if (error) console.error("Update failed:", error);
-    } else {
-      const { data, error } = await supabase
-        .from("schedule_list")
-        .insert([{ ...editingEvent, user_id: userId }])
-        .select();
-      if (error) console.error("Insert failed:", error);
-    }
+    const payload = {
+      date: editingEvent.date || null,
+      time: editingEvent.time || null,
+      title: editingEvent.title,
+      type: editingEvent.type,
+      summary: editingEvent.summary || null,
+      user_id: userId
+    };
 
-    setEditingEvent(null);
-    setShowModal(false);
+    try {
+      if (editingEvent.no) {
+        // 編集
+        const { error } = await supabase
+          .from("schedule_list")
+          .update(payload)
+          .eq("no", editingEvent.no);
+        if (error) throw error;
+      } else {
+        // 新規
+        const { data, error } = await supabase
+          .from("schedule_list")
+          .insert([payload])
+          .select();
+        if (error) throw error;
+      }
+      setEditingEvent(null);
+      setShowModal(false);
+      fetchEvents(); // 反映
+    } catch (err) {
+      console.error("Save failed:", err);
+    }
   };
 
-  const deleteEvent = async (idx) => {
-    const eventToDelete = events[idx];
-    if (!eventToDelete.no) return;
+  const deleteEvent = async (eventNo) => {
+    if (!eventNo) return;
 
-    const { error } = await supabase
-      .from("schedule_list")
-      .delete()
-      .eq("no", eventToDelete.no);
-    if (error) console.error("Delete failed:", error);
+    try {
+      const { error } = await supabase
+        .from("schedule_list")
+        .delete()
+        .eq("no", eventNo);
+
+      if (error) throw error;
+
+      // 削除後に即反映
+      fetchEvents();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (
