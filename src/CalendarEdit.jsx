@@ -54,6 +54,8 @@ const CalendarEdit = () => {
     setShowModal(true);
   };
 
+  const TEST_USER_ID = "11111111-1111-1111-1111-111111111111"; // テスト用固定 UUID
+
   const saveEvent = async () => {
     if (!editingEvent.title) return;
     if (!user) {
@@ -71,6 +73,7 @@ const CalendarEdit = () => {
           title: editingEvent.title,
           type: editingEvent.type,
           summary: editingEvent.summary,
+          user_id: TEST_USER_ID, // ←固定 UUID
         })
         .eq("no", editingEvent.no);
       if (error) console.error("Update failed:", error);
@@ -84,8 +87,9 @@ const CalendarEdit = () => {
           title: editingEvent.title,
           type: editingEvent.type,
           summary: editingEvent.summary,
-          user_id: user.id,  // ← Auth 対応
-        }]);
+          user_id: TEST_USER_ID, // ←固定 UUID
+        }])
+        .select();
       if (error) console.error("Insert failed:", error);
     }
 
