@@ -43,60 +43,93 @@ const CalendarEdit = ({ userId }) => {
   };
 
   // 保存処理（新規／編集両対応）
-  const saveEvent = async () => {
-    if (!editingEvent.title) return;
+// 新規保存用
+const saveNewEvent = async () => {
+  if (!editingEvent.title) return;
 
-    const payload = {
-      date: editingEvent.date || null,
-      time: editingEvent.time || null,
-      title: editingEvent.title,
-      type: editingEvent.type,
-      summary: editingEvent.summary || null,
-      user_id: userId,
-    };
-
-    try {
-      if (editingEvent.no) {
-        // 編集
-        const { error } = await supabase
-          .from("schedule_list")
-          .update(payload)
-          .eq("no", editingEvent.no);
-        if (error) throw error;
-      } else {
-        // 新規
-        const { data, error } = await supabase
-          .from("schedule_list")
-          .insert([payload])
-          .select();
-        if (error) throw error;
-      }
-
-      setEditingEvent(null);
-      setShowModal(false);
-      fetchEvents(); // 即反映
-    } catch (err) {
-      console.error("Save failed:", err);
-    }
+  const payload = {
+    date: editingEvent.date || null,
+    time: editingEvent.time || null,
+    title: editingEvent.title,
+    type: editingEvent.type,
+    summary: editingEvent.summary || null,
+    user_id: userId,
   };
 
+  try {
+    const { data, error } = await supabase
+      .from("schedule_list")
+      .insert([payload])
+      .select();
+
+    if (error) throw error;
+
+    console.log("新規挿入結果", data);
+    setEditingEvent(null);
+    setShowModal(false);
+    fetchEvents();
+  } catch (err) {
+    console.error("Save failed:", err);
+  }
+};
+
+// 編集更新用
+const updateEvent = async () => {
+  if (!editingEvent.title) return;
+
+  const payload = {
+    date: editingEvent.date || null,
+    time: editingEvent.time || null,
+    title: editingEvent.title,
+    type: editingEvent.type,
+    summary: editingEvent.summary || null,
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from("schedule_list")
+      .update(payload)
+      .eq("no", editingEvent.no)
+      .select();
+
+    if (error) throw error;
+
+    console.log("更新結果", data);
+    setEditingEvent(null);
+    setShowModal(false);
+    fetchEvents();
+  } catch (err) {
+    console.error("Update failed:", err);
+  }
+};
+
   // 削除処理
-  const deleteEvent = async (eventNo) => {
+  const deleteEvent = async (eventNo, userId) => {
+    console.log("deleteEvent 呼ばれた, no:", eventNo);
+    console.log("typeof eventNo", typeof eventNo, eventNo);
+    console.log("ユーザーID", userId);
+
     if (!eventNo) return;
 
-    try {
-      const { data, error } = await supabase
-        .from("schedule_list")
-        .delete()
-        .eq("no", eventNo)
-        .select(); // これで削除したレコードが返る
+try {
+    // どんなリクエストを送るか確認
+    console.log("Supabase DELETE リクエスト条件:", {
+      table: "schedule_list",
+      conditions: { no: eventNo, user_id: userId },
+    });
+    const { data, error } = await supabase
+      .from("schedule_list")
+      .delete()
+      .eq("no", eventNo)
+      
+      .select();
 
-      if (error) throw error;
+    console.log("DELETE結果 data:", data, "error:", error);
 
-      fetchEvents(); // 即反映
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
+    fetchEvents();
+  } catch (err) {
+    console.error("Delete failed:", err);
+  }
   };
 
   return (
@@ -122,6 +155,7 @@ const CalendarEdit = ({ userId }) => {
         }}
         onDelete={deleteEvent}
         editable
+        userId={userId}
       />
 
       <button
@@ -169,20 +203,20 @@ const CalendarEdit = ({ userId }) => {
               placeholder="詳細"
               className="p-2 rounded bg-gray-700 text-white"
             />
-            <div className="flex justify-between mt-2">
-              <button
-                onClick={saveEvent}
-                className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition"
-              >
-                保存
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition"
-              >
-                キャンセル
-              </button>
-            </div>
+<div className="flex justify-between mt-2">
+  <button
+    onClick={editingEvent.no ? updateEvent : saveNewEvent}
+    className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition"
+  >
+    {editingEvent.no ? "更新" : "保存"}
+  </button>
+  <button
+    onClick={() => setShowModal(false)}
+    className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition"
+  >
+    キャンセル
+  </button>
+</div>
           </div>
         </div>
       )}

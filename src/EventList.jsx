@@ -1,6 +1,6 @@
 import React from "react";
 
-const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
+const EventList = ({ events = [], onEdit, onDelete, editable = false, userId }) => {
   // 日付順ソート（未定は最後）
   const sortedEvents = [...events].sort((a, b) => {
     const hasDateA = a.date && a.date.trim() !== "";
@@ -40,22 +40,29 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false }) => {
                   {ev.summary && <div className="text-gray-300 mt-2 text-sm break-words">{ev.summary}</div>}
                 </div>
 
-{editable && (
-  <div className="flex flex-col gap-2 ml-4">
-    <button
-      onClick={() => onEdit && onEdit(ev.no)}
-      className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
-    >
-      編集
-    </button>
-    <button
-      onClick={() => onDelete && onDelete(ev.no)}
-      className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
-    >
-      削除
-    </button>
-  </div>
-)}
+                {editable && (
+                  <div className="flex flex-col gap-2 ml-4">
+                    <button
+                      onClick={() => {
+                        console.log("編集ボタン押された ev.no:", ev.no);
+                        onEdit && onEdit(ev.no)
+                      }}
+                      className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 text-xs"
+                    >
+                      編集
+                    </button>
+                    <button
+                      onClick={() => {
+                        console.log("削除ボタン押された ev.no:", ev.no);
+                        console.log("ユーザーID", userId);
+                        onDelete && onDelete(ev.no, userId)
+                      }}
+                      className="px-2 py-1 bg-red-500 rounded hover:bg-red-600 text-xs"
+                    >
+                      削除
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
