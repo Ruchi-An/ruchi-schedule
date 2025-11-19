@@ -164,3 +164,40 @@ backdrop-filter: blur(18px) saturate(180%);
   font-weight: 700;
   font-size: 0.8rem;
 }
+
+
+/* ============================= */
+/*        📱 スマホ最適化        */
+/* ============================= */
+@media (max-width: 480px) {
+  /* カレンダー全体の余白を調整 */
+  .calendar-container {
+    padding: 10px;
+  }
+
+  /* 曜日ラベルを小さく */
+  .calendar-weekdays {
+    font-size: 0.7rem;
+  }
+
+  /* 日付セルをもっとコンパクトに */
+  .calendar-day {
+    padding: 4px;
+    min-height: 3.5rem;
+  }
+
+  .day-number {
+    font-size: 0.9rem;
+  }
+
+  /* イベント文字をさらに縮小 */
+  .events-list {
+    font-size: 0.6rem;
+  }
+
+  /* → 最大のポイント ← */
+  /* 7列グリッドを“縮めても入るように”する */
+  .calendar-days {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
