@@ -1,6 +1,8 @@
 import React from "react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
+import "./CalendarLayout.css";
+
 dayjs.extend(isoWeek);
 
 const CalendarLayout = ({ events = [] }) => {
@@ -27,61 +29,56 @@ const CalendarLayout = ({ events = [] }) => {
   }
 
   const getEventsForDay = (date) => events.filter((e) => e.date === date.format("YYYY-MM-DD"));
-
-  const weekdays = ["月", "火", "水", "木", "金", "土", "日"];
+  const weekdays = ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."];
 
   return (
-    <div className="relative w-full p-4 rounded-2xl overflow-hidden mx-auto">
-      <div className="absolute inset-0 bg-indigo-900/20 backdrop-blur-2xl rounded-2xl"></div>
+    <div className="calendar-container">
+      <div className="calendar-controls">
+        <button className="btn-month" onClick={prevMonth}>◀</button>
 
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <button onClick={prevMonth} className="px-3 py-1 rounded-2xl bg-indigo-800/50 text-white shadow-[0_0_12px_#00ffff60] hover:bg-indigo-700/60">
-            ◀ 前月
-          </button>
-
-          <div className="flex items-center gap-3">
-            <select value={currentMonth.year()} onChange={handleYearChange} className="bg-indigo-800/50 text-white px-3 py-1 rounded-2xl border border-cyan-300/50 shadow-[0_0_8px_#00ffff50]">
-              {years.map((y) => (<option key={y} value={y}>{y}年</option>))}
-            </select>
-
-            <select value={currentMonth.month() + 1} onChange={handleMonthChange} className="bg-indigo-800/50 text-white px-3 py-1 rounded-2xl border border-cyan-300/50 shadow-[0_0_8px_#00ffff50]">
-              {months.map((m) => (<option key={m} value={m}>{m}月</option>))}
-            </select>
-
-            <button onClick={goToToday} className="bg-indigo-800/50 text-white px-3 py-1 rounded-2xl border border-cyan-300/50 shadow-[0_0_8px_#00ffff50]">
-              今日
-            </button>
-          </div>
-
-          <button onClick={nextMonth} className="px-3 py-1 rounded-2xl bg-indigo-800/50 text-white shadow-[0_0_12px_#00ffff60] hover:bg-indigo-700/60">
-            次月 ▶
-          </button>
+        <div className="calendar-selects">
+          <select value={currentMonth.year()} onChange={handleYearChange}>
+            {years.map((y) => (<option key={y} value={y}>{y}年</option>))}
+          </select>
+          <select value={currentMonth.month() + 1} onChange={handleMonthChange}>
+            {months.map((m) => (<option key={m} value={m}>{m}月</option>))}
+          </select>
+          <button className="btn-today" onClick={goToToday}>今日</button>
         </div>
 
-        <div className="grid grid-cols-7 text-center text-white font-bold drop-shadow-[0_0_8px_#00ffff80]">
-          {weekdays.map((d) => (<div key={d} className="p-2">{d}</div>))}
-        </div>
+        <button className="btn-month" onClick={nextMonth}>▶</button>
+      </div>
 
-        <div className="grid grid-cols-7 text-center mt-1 gap-1">
-          {calendar.map((day) => {
-            const isCurrent = day.month() === currentMonth.month();
-            const isToday = day.isSame(today, "day");
-            return (
-              <div key={day.format("YYYY-MM-DD")} className={`p-2 min-h-[5.2rem] rounded-xl border ${isCurrent ? "bg-indigo-900/40" : "bg-indigo-900/10"} border-blue-400/60 ${isToday ? "shadow-[0_0_20px_#ffee88] border-yellow-300" : ""}`}>
-                <span className="text-white font-bold drop-shadow-[0_0_6px_#00ffff]">{day.date()}</span>
+      <div className="calendar-weekdays">
+        {weekdays.map((d) => <div key={d}>{d}</div>)}
+      </div>
 
-                <ul className="mt-1 text-xs flex flex-col gap-0.5">
-                  {getEventsForDay(day).map((ev, i) => (
-                    <li key={i} className="bg-cyan-400/60 text-white px-1 rounded text-[0.65rem] truncate shadow-[0_0_5px_#00ffff]">
-                      {ev.title}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
+      <div className="calendar-days">
+        {calendar.map((day) => {
+          const isCurrent = day.month() === currentMonth.month();
+          const isToday = day.isSame(today, "day");
+          return (
+            <div key={day.format("YYYY-MM-DD")} className={`calendar-day ${isCurrent ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}`}>
+              <span className="day-number">{day.date()}</span>
+<ul className="events-list">
+  {getEventsForDay(day).map((ev, i) => {
+    const typeClass = ev.type
+      ? `type-${ev.type.replace(/\s+/g, "").toLowerCase()}`
+      : "";
+
+    return (
+      <li
+        key={i}
+        className={`event-item ${typeClass}`}
+      >
+        {ev.title}
+      </li>
+    );
+  })}
+</ul>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

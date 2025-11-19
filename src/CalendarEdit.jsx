@@ -2,221 +2,90 @@ import React, { useState, useEffect } from "react";
 import CalendarLayout from "./CalendarLayout.jsx";
 import EventList from "./EventList.jsx";
 import { supabase } from "./supabaseClient";
+import "./CalendarEdit.css";
 
 const CalendarEdit = ({ userId }) => {
   const [events, setEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // DB からイベント取得
   const fetchEvents = async () => {
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: true });
-
-    if (error) console.error("Fetch failed:", error);
+    if (error) console.error(error);
     else setEvents(data || []);
   };
 
   useEffect(() => {
     fetchEvents();
-
-    // Realtime チャンネル登録（最小限）
     const channel = supabase
       .channel("public:schedule_list")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "schedule_list" },
-        () => fetchEvents()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule_list" }, fetchEvents)
       .subscribe();
-
     return () => supabase.removeChannel(channel);
   }, [userId]);
 
-  // 新規イベントモーダル開く
   const openNewEventModal = () => {
-    setEditingEvent({ date: "", time: "", title: "", type: "ゲーム", summary: "" });
+    setEditingEvent({ date:"", time:"", title:"", type:"ゲーム", summary:"" });
     setShowModal(true);
   };
 
-  // 保存処理（新規／編集両対応）
-// 新規保存用
-const saveNewEvent = async () => {
-  if (!editingEvent.title) return;
-
-  const payload = {
-    date: editingEvent.date || null,
-    time: editingEvent.time || null,
-    title: editingEvent.title,
-    type: editingEvent.type,
-    summary: editingEvent.summary || null,
-    user_id: userId,
-  };
-
-  try {
-    const { data, error } = await supabase
-      .from("schedule_list")
-      .insert([payload])
-      .select();
-
-    if (error) throw error;
-
-    console.log("新規挿入結果", data);
+  const saveNewEvent = async () => {
+    if(!editingEvent.title) return;
+    const payload = { ...editingEvent, user_id: userId, date: editingEvent.date||null, time: editingEvent.time||null, summary: editingEvent.summary||null };
+    const { error } = await supabase.from("schedule_list").insert([payload]);
+    if(error) console.error(error);
     setEditingEvent(null);
     setShowModal(false);
     fetchEvents();
-  } catch (err) {
-    console.error("Save failed:", err);
-  }
-};
-
-// 編集更新用
-const updateEvent = async () => {
-  if (!editingEvent.title) return;
-
-  const payload = {
-    date: editingEvent.date || null,
-    time: editingEvent.time || null,
-    title: editingEvent.title,
-    type: editingEvent.type,
-    summary: editingEvent.summary || null,
   };
 
-  try {
-    const { data, error } = await supabase
-      .from("schedule_list")
-      .update(payload)
-      .eq("no", editingEvent.no)
-      .select();
-
-    if (error) throw error;
-
-    console.log("更新結果", data);
+  const updateEvent = async () => {
+    if(!editingEvent.title) return;
+    const payload = { ...editingEvent, date: editingEvent.date||null, time: editingEvent.time||null, summary: editingEvent.summary||null };
+    const { error } = await supabase.from("schedule_list").update(payload).eq("no", editingEvent.no);
+    if(error) console.error(error);
     setEditingEvent(null);
     setShowModal(false);
     fetchEvents();
-  } catch (err) {
-    console.error("Update failed:", err);
-  }
-};
+  };
 
-  // 削除処理
   const deleteEvent = async (eventNo, userId) => {
-    console.log("deleteEvent 呼ばれた, no:", eventNo);
-    console.log("typeof eventNo", typeof eventNo, eventNo);
-    console.log("ユーザーID", userId);
-
-    if (!eventNo) return;
-
-try {
-    // どんなリクエストを送るか確認
-    console.log("Supabase DELETE リクエスト条件:", {
-      table: "schedule_list",
-      conditions: { no: eventNo, user_id: userId },
-    });
-    const { data, error } = await supabase
-      .from("schedule_list")
-      .delete()
-      .eq("no", eventNo)
-      
-      .select();
-
-    console.log("DELETE結果 data:", data, "error:", error);
-
+    if(!eventNo) return;
+    const { error } = await supabase.from("schedule_list").delete().eq("no", eventNo);
+    if(error) console.error(error);
     fetchEvents();
-  } catch (err) {
-    console.error("Delete failed:", err);
-  }
   };
 
   return (
-    <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto relative">
+    <div className="calendar-edit-container">
       <CalendarLayout
         events={events}
         onCellClick={(day) => {
-          const eventForDay = events.find(e => e.date === day.format("YYYY-MM-DD"));
-          if (eventForDay) {
-            setEditingEvent({ ...eventForDay });
-            setShowModal(true);
-          }
+          const ev = events.find(e=>e.date===day.format("YYYY-MM-DD"));
+          if(ev){ setEditingEvent({...ev}); setShowModal(true);}
         }}
       />
-
-      <EventList
-        events={events}
-        onEdit={(no) => {
-          const ev = events.find(e => e.no === no);
-          if (!ev) return;
-          setEditingEvent({ ...ev });
-          setShowModal(true);
-        }}
-        onDelete={deleteEvent}
-        editable
-        userId={userId}
-      />
-
-      <button
-        onClick={openNewEventModal}
-        className="fixed top-8 right-8 px-4 py-3 bg-cyan-400 rounded-full shadow-lg hover:bg-cyan-500 transition"
-      >
-        予定追加
-      </button>
+      <EventList events={events} onEdit={(no)=>{const ev = events.find(e=>e.no===no); if(ev) {setEditingEvent({...ev}); setShowModal(true);}}} onDelete={deleteEvent} editable userId={userId} />
+      <button className="btn-add-event" onClick={openNewEventModal}>予定追加</button>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-indigo-900/30 backdrop-blur-xl p-6 rounded-2xl w-96 flex flex-col gap-4">
-            <input
-              type="date"
-              value={editingEvent.date}
-              onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })}
-              className="p-2 rounded bg-gray-700 text-white"
-            />
-            <input
-              type="time"
-              value={editingEvent.time}
-              onChange={e => setEditingEvent({ ...editingEvent, time: e.target.value })}
-              className="p-2 rounded bg-gray-700 text-white"
-            />
-            <input
-              type="text"
-              value={editingEvent.title}
-              onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })}
-              placeholder="タイトル"
-              className="p-2 rounded bg-gray-700 text-white"
-            />
-            <select
-              value={editingEvent.type}
-              onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value })}
-              className="p-2 rounded bg-gray-700 text-white"
-            >
-              <option value="ゲーム">ゲーム</option>
-              <option value="シナリオ">シナリオ</option>
-              <option value="リアル">リアル</option>
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <input type="date" value={editingEvent.date} onChange={e=>setEditingEvent({...editingEvent, date:e.target.value})}/>
+            <input type="time" value={editingEvent.time} onChange={e=>setEditingEvent({...editingEvent, time:e.target.value})}/>
+            <input type="text" value={editingEvent.title} onChange={e=>setEditingEvent({...editingEvent, title:e.target.value})} placeholder="タイトル"/>
+            <select value={editingEvent.type} onChange={e=>setEditingEvent({...editingEvent, type:e.target.value})}>
+              <option>コラボ</option><option>ソロ</option><option>マダミス</option><option>ストプレ</option><option>スパイゲーム</option><option>その他シナリオ</option><option>リアル</option>
             </select>
-            <input
-              type="text"
-              value={editingEvent.summary}
-              onChange={e => setEditingEvent({ ...editingEvent, summary: e.target.value })}
-              placeholder="詳細"
-              className="p-2 rounded bg-gray-700 text-white"
-            />
-<div className="flex justify-between mt-2">
-  <button
-    onClick={editingEvent.no ? updateEvent : saveNewEvent}
-    className="px-3 py-1 bg-cyan-400 rounded hover:bg-cyan-500 transition"
-  >
-    {editingEvent.no ? "更新" : "保存"}
-  </button>
-  <button
-    onClick={() => setShowModal(false)}
-    className="px-3 py-1 bg-gray-500 rounded hover:bg-gray-600 transition"
-  >
-    キャンセル
-  </button>
-</div>
+            <input type="text" value={editingEvent.summary} onChange={e=>setEditingEvent({...editingEvent, summary:e.target.value})} placeholder="詳細"/>
+            <div className="modal-buttons">
+              <button onClick={editingEvent.no?updateEvent:saveNewEvent}>{editingEvent.no?"更新":"保存"}</button>
+              <button onClick={()=>setShowModal(false)}>キャンセル</button>
+            </div>
           </div>
         </div>
       )}

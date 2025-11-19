@@ -1,46 +1,41 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* ============================= */
+/*   サイト全体背景（暗め＋画像） */
+/* ============================= */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(
+      rgba(10, 25, 80, 0.4),  /* 藍色系の半透明 */
+      rgba(10, 25, 80, 0.4)
+    ),
+    url('./assets/okumono_neonstar21.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* ヘッダー */
+.app-header {
+  backdrop-filter: blur(12px);
+  padding: 24px;
   text-align: center;
+  box-shadow: 0 0 25px rgba(0,0,0,0.1);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #fff;
+  text-shadow: 0 0 20px #00ffff;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* メイン */
+.app-main {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-body {
-  backdrop-filter: blur(8px);
+.app-main > div {
+  width: 100%;
+  max-width: 1600px;
 }
