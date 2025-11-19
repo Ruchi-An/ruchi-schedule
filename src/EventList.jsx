@@ -1,6 +1,8 @@
 import React from "react";
+import dayjs from "dayjs";
 import "./EventList.css";
 import "./Type.css";
+
 
 const EventList = ({ events = [], onEdit, onDelete, editable = false, userId }) => {
 
@@ -10,13 +12,24 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false, userId }) 
     return time.slice(0, 5);
   };
 
-  const sortedEvents = [...events].sort((a, b) => {
+
+  const today = dayjs().format("YYYY-MM-DD");
+
+  // 今日以降 or 未定だけを残すフィルタ
+  const filteredEvents = events.filter(ev => {
+    if (!ev.date || ev.date.trim() === "") return true; // 未定は残す
+    return ev.date >= today; // 今日以降を残す
+  });
+
+  // 並び替え（未定 → 今日以降 → 時間順）
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
     const hasDateA = a.date && a.date.trim() !== "";
     const hasDateB = b.date && b.date.trim() !== "";
-    if (!hasDateA && hasDateB) return 1;
-    if (hasDateA && !hasDateB) return -1;
-    if (!hasDateA && !hasDateB) return 0;
 
+    if (!hasDateA && hasDateB) return 1; // 未定を下へ
+    if (hasDateA && !hasDateB) return 1;
+
+    // 日時順
     const dateA = new Date(`${a.date} ${a.time || "00:00"}`);
     const dateB = new Date(`${b.date} ${b.time || "00:00"}`);
     return dateA - dateB;
@@ -41,7 +54,9 @@ const EventList = ({ events = [], onEdit, onDelete, editable = false, userId }) 
                 </div>
 
                 {/* タイトル（大きめ） */}
-                <div className="event-title">{ev.title}</div>
+                <div className="event-title">
+                  {`${ev.category || "カテゴリ未設定"}｜${ev.title}`}
+                </div>
 
                 {/* 概要 */}
                 {ev.summary && (

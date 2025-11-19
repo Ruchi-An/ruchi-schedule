@@ -19,13 +19,13 @@
   color: white;
   font-weight: 700;
   font-size: 1.5rem;
-  text-shadow: 0 0 8px rgba(255,255,255,0.8);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   margin-bottom: 16px;
 }
 
 .no-events {
   color: #bbb;
-  text-shadow: 0 0 5px rgba(255,255,255,0.5);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 
@@ -44,10 +44,9 @@
 
 .eventlist-item {
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255,255,255,0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-
   padding: 14px;
   border-radius: 14px;
 
@@ -55,7 +54,7 @@
   justify-content: space-between;
   align-items: flex-start;
 
-  box-shadow: 0 0 12px rgba(255,255,255,0.25);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
 }
 
 .event-info {
@@ -112,12 +111,12 @@
   padding: 6px 10px;
   border-radius: 10px;
   font-size: 0.75rem;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: white;
 
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(6px);
-  box-shadow: 0 0 6px rgba(255,255,255,0.4);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
 
   cursor: pointer;
   transition: 0.2s;
@@ -125,6 +124,6 @@
 
 .btn-edit:hover,
 .btn-delete:hover {
-  background: rgba(255,255,255,0.3);
-  box-shadow: 0 0 10px rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }

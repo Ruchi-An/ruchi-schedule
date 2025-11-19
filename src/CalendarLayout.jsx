@@ -57,25 +57,34 @@ const CalendarLayout = ({ events = [] }) => {
         {calendar.map((day) => {
           const isCurrent = day.month() === currentMonth.month();
           const isToday = day.isSame(today, "day");
-          return (
-            <div key={day.format("YYYY-MM-DD")} className={`calendar-day ${isCurrent ? 'current-month' : 'other-month'} ${isToday ? 'today' : ''}`}>
-              <span className="day-number">{day.date()}</span>
-<ul className="events-list">
-  {getEventsForDay(day).map((ev, i) => {
-    const typeClass = ev.type
-      ? `type-${ev.type.replace(/\s+/g, "").toLowerCase()}`
-      : "";
 
-    return (
-      <li
-        key={i}
-        className={`event-item ${typeClass}`}
-      >
-        {ev.title}
-      </li>
-    );
-  })}
-</ul>
+          // その日のイベント取得
+          const dayEvents = getEventsForDay(day);
+
+          // スマホ判定
+          const isMobile = window.innerWidth <= 768;
+
+          return (
+            <div
+              key={day.format("YYYY-MM-DD")}
+              className={`calendar-day ${isCurrent ? "current-month" : "other-month"} ${isToday ? "today" : ""}`}
+            >
+              <span className="day-number">{day.date()}</span>
+              <ul className="events-list">
+                {dayEvents.map((ev, i) => {
+                  const typeClass = ev.type
+                    ? `type-${ev.type.replace(/\s+/g, "").toLowerCase()}`
+                    : "";
+
+                  return (
+                    <li key={i} className={`event-item ${typeClass}`}>
+                      {isMobile
+                        ? ev.category
+                        : `${ev.category}｜${ev.title}`}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           );
         })}

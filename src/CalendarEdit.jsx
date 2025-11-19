@@ -29,34 +29,34 @@ const CalendarEdit = ({ userId }) => {
   }, [userId]);
 
   const openNewEventModal = () => {
-    setEditingEvent({ date:"", time:"", title:"", type:"ゲーム", summary:"" });
+    setEditingEvent({ date: "", time: "", title: "", type: "", category: "", summary: "" });
     setShowModal(true);
   };
 
   const saveNewEvent = async () => {
-    if(!editingEvent.title) return;
-    const payload = { ...editingEvent, user_id: userId, date: editingEvent.date||null, time: editingEvent.time||null, summary: editingEvent.summary||null };
+    if (!editingEvent.title) return;
+    const payload = { ...editingEvent, user_id: userId, date: editingEvent.date || null, time: editingEvent.time || null, summary: editingEvent.summary || null };
     const { error } = await supabase.from("schedule_list").insert([payload]);
-    if(error) console.error(error);
+    if (error) console.error(error);
     setEditingEvent(null);
     setShowModal(false);
     fetchEvents();
   };
 
   const updateEvent = async () => {
-    if(!editingEvent.title) return;
-    const payload = { ...editingEvent, date: editingEvent.date||null, time: editingEvent.time||null, summary: editingEvent.summary||null };
+    if (!editingEvent.title) return;
+    const payload = { ...editingEvent, date: editingEvent.date || null, time: editingEvent.time || null, summary: editingEvent.summary || null };
     const { error } = await supabase.from("schedule_list").update(payload).eq("no", editingEvent.no);
-    if(error) console.error(error);
+    if (error) console.error(error);
     setEditingEvent(null);
     setShowModal(false);
     fetchEvents();
   };
 
   const deleteEvent = async (eventNo, userId) => {
-    if(!eventNo) return;
+    if (!eventNo) return;
     const { error } = await supabase.from("schedule_list").delete().eq("no", eventNo);
-    if(error) console.error(error);
+    if (error) console.error(error);
     fetchEvents();
   };
 
@@ -65,26 +65,93 @@ const CalendarEdit = ({ userId }) => {
       <CalendarLayout
         events={events}
         onCellClick={(day) => {
-          const ev = events.find(e=>e.date===day.format("YYYY-MM-DD"));
-          if(ev){ setEditingEvent({...ev}); setShowModal(true);}
+          const ev = events.find(e => e.date === day.format("YYYY-MM-DD"));
+          if (ev) { setEditingEvent({ ...ev }); setShowModal(true); }
         }}
       />
-      <EventList events={events} onEdit={(no)=>{const ev = events.find(e=>e.no===no); if(ev) {setEditingEvent({...ev}); setShowModal(true);}}} onDelete={deleteEvent} editable userId={userId} />
+      <EventList events={events} onEdit={(no) => { const ev = events.find(e => e.no === no); if (ev) { setEditingEvent({ ...ev }); setShowModal(true); } }} onDelete={deleteEvent} editable userId={userId} />
       <button className="btn-add-event" onClick={openNewEventModal}>予定追加</button>
 
       {showModal && (
         <div className="modal-backdrop">
           <div className="modal-content">
-            <input type="date" value={editingEvent.date} onChange={e=>setEditingEvent({...editingEvent, date:e.target.value})}/>
-            <input type="time" value={editingEvent.time} onChange={e=>setEditingEvent({...editingEvent, time:e.target.value})}/>
-            <input type="text" value={editingEvent.title} onChange={e=>setEditingEvent({...editingEvent, title:e.target.value})} placeholder="タイトル"/>
-            <select value={editingEvent.type} onChange={e=>setEditingEvent({...editingEvent, type:e.target.value})}>
-              <option>コラボ</option><option>ソロ</option><option>マダミス</option><option>ストプレ</option><option>スパイゲーム</option><option>その他シナリオ</option><option>リアル</option>
+            <input
+              type="date"
+              value={editingEvent.date}
+              onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })}
+            />
+            <input
+              type="time"
+              value={editingEvent.time}
+              onChange={e => setEditingEvent({ ...editingEvent, time: e.target.value })}
+            />
+            <input
+              type="text"
+              value={editingEvent.title}
+              onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })}
+              placeholder="タイトル"
+            />
+
+            {/* タイプ選択 */}
+            <select
+              value={editingEvent.type}
+              onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value, category: "" })}
+            >
+              <option value="">選択してください</option>
+              <option value="game">🎮ゲーム</option>
+              <option value="scenario">📚シナリオ</option>
+              <option value="real">🌏リアル</option>
             </select>
-            <input type="text" value={editingEvent.summary} onChange={e=>setEditingEvent({...editingEvent, summary:e.target.value})} placeholder="詳細"/>
+
+            {/* カテゴリ選択：タイプによって切り替え */}
+            <select
+              value={editingEvent.category}
+              onChange={e => setEditingEvent({ ...editingEvent, category: e.target.value })}
+            >
+              <option value="">選択してください</option>
+              {editingEvent.type === "game" && (
+                <>
+                  <option value="🤪">🤪</option>
+                  <option value="🚀">🚀</option>
+                  <option value="🍎">🍎</option>
+                  <option value="🐺">🐺</option>
+                  <option value="🔍">🔍</option>
+                  <option value="🪿">🪿</option>
+                  <option value="🫖">🫖</option>
+                  <option value="🚙">🚙</option>
+                  <option value="🛸">🛸</option>
+                  <option value="⛄">⛄</option>
+                  <option value="👻">👻</option>
+                  <option value="💳">💳</option>
+                </>
+              )}
+              {editingEvent.type === "scenario" && (
+                <>
+                  <option value="📕">📕</option>
+                  <option value="📗">📗</option>
+                  <option value="📘">📘</option>
+                  <option value="📙">📙</option>
+                </>
+              )}
+              {editingEvent.type === "real" && (
+                <>
+                  <option value="🌏">🌏</option>
+                </>
+              )}
+            </select>
+
+            <input
+              type="text"
+              value={editingEvent.summary}
+              onChange={e => setEditingEvent({ ...editingEvent, summary: e.target.value })}
+              placeholder="詳細"
+            />
+
             <div className="modal-buttons">
-              <button onClick={editingEvent.no?updateEvent:saveNewEvent}>{editingEvent.no?"更新":"保存"}</button>
-              <button onClick={()=>setShowModal(false)}>キャンセル</button>
+              <button onClick={editingEvent.no ? updateEvent : saveNewEvent}>
+                {editingEvent.no ? "更新" : "保存"}
+              </button>
+              <button onClick={() => setShowModal(false)}>キャンセル</button>
             </div>
           </div>
         </div>
