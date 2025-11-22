@@ -75,3 +75,24 @@
 .modal-buttons button:last-child:hover {
   background: #4b5563;
 }
+
+.input-with-clear {
+  position: relative;
+  display: inline-block;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  color: #fff;
+}

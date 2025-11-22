@@ -1,7 +1,9 @@
+/* CalendarLayout.module.css */
+
 /* ============================= */
-/*   カレンダー全体  */
+/*   カレンダー全体（ガラス風） */
 /* ============================= */
-.calendar-container {
+.calendarContainer {
   position: relative;
   width: 100%;
   padding: 20px;
@@ -9,7 +11,6 @@
   margin: 0 auto;
 
   background: rgba(0, 0, 20, 0.25);
-  /* 黒寄りの濃いガラス */
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
 
@@ -17,11 +18,10 @@
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
 
-
 /* ============================= */
-/*   コントロール部（白ネオン）    */
+/*   コントロール部（白ネオン）  */
 /* ============================= */
-.calendar-controls {
+.calendarControls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,8 +30,8 @@
   margin-bottom: 16px;
 }
 
-.btn-month,
-.btn-today {
+.btnMonth,
+.btnToday {
   padding: 8px 14px;
   border-radius: 20px;
 
@@ -46,13 +46,13 @@
   transition: 0.2s;
 }
 
-.btn-month:hover,
-.btn-today:hover {
+.btnMonth:hover,
+.btnToday:hover {
   background: rgba(255, 255, 255, 0.35);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
 }
 
-.calendar-selects select {
+.calendarSelects select {
   padding: 8px 12px;
   border-radius: 16px;
 
@@ -63,11 +63,10 @@
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
 }
 
-
 /* ============================= */
 /*        曜日ヘッダー           */
 /* ============================= */
-.calendar-weekdays {
+.calendarWeekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
@@ -76,22 +75,18 @@
   font-weight: bold;
   text-shadow: 0 0 6px rgba(255, 255, 255, 1);
   font-size: 1.2rem;
-
 }
-
 
 /* ============================= */
 /*          日付セル             */
 /* ============================= */
-
-.calendar-days {
+.calendarDays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
 
-/* ベース（白枠 & ガラス） */
-.calendar-day {
+.calendarDay {
   padding: 8px;
   min-height: 5rem;
 
@@ -107,32 +102,38 @@
   transition: 0.2s;
 }
 
-/* 当月以外 → 存在感薄く */
-.calendar-day.other-month {
+.calendarDay.otherMonth {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
   opacity: 0.45;
 }
 
-/* 今日 → 金色に発光 */
-.calendar-day.today {
+.calendarDay.today {
   border-color: #fff2a8;
   box-shadow: 0 0 14px #fff2a8;
 }
 
-/* 日付数字 */
-.day-number {
+.dayNumber {
   font-weight: bold;
   color: white;
-  text-shadow: 0 0 8px #fff;
   font-size: 1.1rem;
 }
 
+.calendarDay.sat .dayNumber {
+  color: #4aa3ff;
+}
+.calendarDay.sun .dayNumber {
+  color: #ff6b6b;
+}
+.calendarDay.holiday .dayNumber {
+  color: #ff4b4b;
+  font-weight: bold;
+}
 
 /* ============================= */
-/*     イベント表示（かわいい）   */
+/*      イベント表示（ガラス風） */
 /* ============================= */
-.events-list {
+.eventsList {
   margin-top: 4px;
   display: flex;
   flex-direction: column;
@@ -140,13 +141,9 @@
   font-size: 0.7rem;
 }
 
-/* ------------------------ */
-/*  ベースイベント：明るめガラス */
-/* ------------------------ */
-.event-item {
+.eventItem {
   position: relative;
 
-  /* 背景：明るめのグレーガラス */
   background: rgba(40, 40, 60, 0.25);
   backdrop-filter: blur(8px) saturate(160%);
   -webkit-backdrop-filter: blur(8px) saturate(160%);
@@ -159,69 +156,37 @@
   padding: 4px 8px;
   border-radius: 7px;
 
-  /* 文字くっきり化（黒縁あり） */
   color: #fff;
-  /* 濃紺文字 */
   font-weight: 700;
   font-size: 0.8rem;
 }
 
+/* ============================= */
+/*      時間帯枠色（TimeColor）  */
+/* ============================= */
+.borderMorning { background: rgba(100, 230, 255, 0.15); border-color: rgba(100, 230, 255, 0.87); border-left:5px solid rgba(100,230,255,0.85); box-shadow:0 0 6px rgba(100,230,255,0.6); color:#fff;}
+.borderNoon { background: rgba(255, 230, 120, 0.13); border-color: rgba(255,230,120,0.7); border-left:4px solid rgba(255,230,120,0.85); box-shadow:0 0 6px rgba(255,230,120,0.6); color:#fff;}
+.borderNight { background: rgba(35, 125, 255, 0.18); border-color: rgba(35,125,255,0.7); border-left:5px solid rgba(35,125,255,0.85); box-shadow:0 0 6px rgba(0,81,255,0.6); color:#fff;}
+.borderMidnight { background: rgba(180,120,255,0.15); border-color: rgba(180,120,255,0.7); border-left:5px solid rgba(180,120,255,0.85); box-shadow:0 0 6px rgba(180,120,255,0.6); color:#fff;}
+.borderSleep { background: rgba(150,255,170,0.15); border-color: rgba(150,255,170,0.7); border-left:5px solid rgba(150,255,170,0.85); box-shadow:0 0 6px rgba(150,255,170,0.6); color:#fff;}
+.borderAllday { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.7); border-left:5px solid rgba(255,255,255,0.85); box-shadow:0 0 6px rgba(255,255,255,0.6); color:#fff;}
+.borderOther { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.7); border-left:5px solid rgba(255,255,255,0.85); box-shadow:0 0 6px rgba(255,255,255,255,0.6); color:#fff;}
 
 /* ============================= */
 /*        📱 スマホ最適化        */
 /* ============================= */
 @media (max-width: 480px) {
-
-  /* カレンダー全体の余白を調整 */
-  .calendar-container {
-    padding: 10px;
-  }
-
-  /* 曜日ラベルを小さく */
-  .calendar-weekdays {
-    font-size: 0.7rem;
-  }
-
-  /* 日付セルをもっとコンパクトに */
-  .calendar-day {
-    padding: 4px;
-    min-height: 3.5rem;
-  }
-
-  .day-number {
-    font-size: 0.9rem;
-  }
-
-  /* イベント文字をさらに縮小 */
-  .events-list {
-    font-size: 0.6rem;
-  }
-
-  /* → 最大のポイント ← */
-  /* 7列グリッドを“縮めても入るように”する */
-  .calendar-days {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
+  .calendarContainer { padding: 10px; }
+  .calendarWeekdays { font-size: 0.7rem; }
+  .calendarDay { padding: 4px; min-height: 3.5rem; }
+  .dayNumber { font-size: 0.9rem; }
+  .eventsList { font-size: 0.6rem; }
+  .calendarDays { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 }
 
-/* スマホ表示のときだけ真ん中寄せ */
 @media (max-width: 600px) {
-  .calendar-day {
-    text-align: center;
-  }
-
-  .calendar-day .events-list {
-    align-items: center;
-  }
-
-  .calendar-day .event-item {
-    margin: 0 auto;
-    /* イベントの箱を中央寄せ */
-  }
-
-  .day-number {
-    margin-left: 0;
-    /* 左寄せ解除 */
-    margin-right: 0;
-  }
+  .calendarDay { text-align: center; }
+  .calendarDay .eventsList { align-items: center; }
+  .calendarDay .eventItem { margin: 0 auto; }
+  .dayNumber { margin-left: 0; margin-right: 0; }
 }

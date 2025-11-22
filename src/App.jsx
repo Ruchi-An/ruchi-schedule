@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import CalendarView from "./CalendarView.jsx";
-import CalendarEdit from "./CalendarEdit.jsx";
-import { supabase } from "./supabaseClient";
+import RuchisukeView from "./pages/RuchisukeView.jsx";
+import RuchisukeEdit from "./pages/RuchisukeEdit.jsx";
+import { supabase } from "./services/supabaseClient";
 import "./App.css";
 
 const App = () => {
@@ -16,8 +16,8 @@ const App = () => {
         </header>
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<CalendarView userId={FIXED_USER_ID} />} />
-            <Route path="/edit" element={<CalendarEdit userId={FIXED_USER_ID} />} />
+            <Route path="/" element={<RuchisukeView userId={FIXED_USER_ID} />} />
+            <Route path="/edit" element={<RuchisukeEdit userId={FIXED_USER_ID} />} />
           </Routes>
         </main>
       </div>

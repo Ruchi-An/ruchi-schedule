@@ -1,0 +1,94 @@
+/* ScheduleListLayout.module.css：コンパクト版 */
+
+.schedulelistContainer {
+  position: relative;
+  width: 100%;
+  padding: 12px;       /* ←小さく */
+  border-radius: 12px; /* ←少し小さめ */
+  margin: 0 auto;
+  background: rgba(0, 0, 20, 0.25);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.schedulelistContainer h3 {
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;   /* ←少し小さく */
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+}
+
+.schedulelist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;  /* ←少し間隔縮める */
+}
+
+.schedulelistItem {
+  position: relative;
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 10px;       /* ←少し小さく */
+  border-radius: 10px; /* ←小さめ */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.eventInfo {
+  flex: 1;
+}
+
+.eventTitle {
+  font-size: 1rem;   /* ←少し小さめ */
+  font-weight: 800;
+  color: #e0f4ff;
+  margin-bottom: 2px;
+}
+
+.eventType {
+  font-size: 0.8rem;
+  color: #bbd4ff;
+  margin-bottom: 4px;
+}
+
+.eventSummary {
+  color: #dfe6ff;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  word-break: break-word;
+}
+
+.eventActions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;   /* ←少し狭め */
+  margin-left: 12px;
+}
+
+.btnEdit,
+.btnDelete {
+  padding: 4px 8px;     /* ←小さめ */
+  border-radius: 8px;   /* ←少し小さく */
+  font-size: 1.0rem;    /* ←小さめ */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btnEdit:hover,
+.btnDelete:hover {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
