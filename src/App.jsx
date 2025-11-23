@@ -17,7 +17,7 @@ const App = () => {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<RuchisukeView userId={FIXED_USER_ID} />} />
-            <Route path="/edit" element={<RuchisukeEdit userId={FIXED_USER_ID} />} />
+            <Route path="/piyo" element={<RuchisukeEdit userId={FIXED_USER_ID} />} />
           </Routes>
         </main>
       </div>

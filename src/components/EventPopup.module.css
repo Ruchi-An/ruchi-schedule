@@ -1,104 +1,155 @@
-/* EventPopup.module.css（青ネオン・幻想版） */
+/* ================================
+   ✨ 明るくかわいいネオン版
+   EventPopup.module.css
+   ================================ */
 
 .popupOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,15,0.6); /* うっすら暗め、幻想的 */
+  background: rgba(180, 210, 255, 0.12); /* 暗すぎない淡いミスト */
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(10px);
   z-index: 1200;
 }
 
+/* かわいく明るい青ガラスの本体 */
 .popupBox {
   width: min(90%, 420px);
-  background: linear-gradient(180deg, rgba(10,15,30,0.95), rgba(20,28,50,0.95));
-  padding: 18px;
-  border-radius: 14px;
-  color: #c0f0ff; /* 青系文字 */
-  box-shadow: 0 0 20px rgba(0,180,255,0.4), 0 8px 30px rgba(0,0,0,0.5);
+  padding: 26px;
+  border-radius: 20px;
+
+  /* 白×水色のガラス */
+  background: rgba(230, 245, 255, 0.35);
+  border: 1px solid rgba(150, 200, 255, 0.6);
+  backdrop-filter: blur(22px) saturate(140%);
+
+  /* 青ネオンの柔らかい発光 */
+  box-shadow:
+    0 0 18px rgba(150, 210, 255, 0.7),
+    0 0 30px rgba(180, 230, 255, 0.5),
+    inset 0 0 20px rgba(200, 240, 255, 0.4);
+
+  color: #2a3a55;
   position: relative;
-  border: 1px solid rgba(0,180,255,0.3);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+
+  animation: popupFade 0.25s ease-out;
   font-family: "Noto Sans JP", sans-serif;
 }
 
+@keyframes popupFade {
+  from { opacity: 0; transform: scale(0.93); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 閉じるボタン（明るい水色ネオン） */
 .closeIcon {
   position: absolute;
-  right: 10px;
-  top: 8px;
+  right: 14px;
+  top: 12px;
   background: transparent;
   border: none;
-  color: #c0f0ff;
-  font-size: 16px;
+  color: #1d4b8f;
+  font-size: 18px;
   cursor: pointer;
-  text-shadow: 0 0 8px rgba(0,180,255,0.8);
+  text-shadow:
+    0 0 6px rgba(120, 180, 255, 0.8),
+    0 0 10px rgba(160, 220, 255, 0.6);
 }
 
+/* タイトル（ふわかわ青ネオン） */
 .title {
-  margin: 0 0 10px 0;
-  font-size: 1.2rem;
+  margin: 0 0 8px 0;
+  font-size: 1.35rem;
   font-weight: 700;
-  text-shadow: 0 0 8px rgba(0,180,255,0.8);
+  text-align: center;
+  color: #1d4b8f;
+  text-shadow:
+    0 0 5px rgba(120, 180, 255, 0.8),
+    0 0 10px rgba(180, 230, 255, 0.7);
 }
 
+/* 入力欄コンテナ */
 .meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
+/* 入力欄（白ガラス×青ふち） */
 .meta input,
 .meta select,
 .meta textarea {
   width: 100%;
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,180,255,0.4);
-  background: rgba(0,30,60,0.7);
-  color: #c0f0ff;
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(150, 200, 255, 0.7);
+  color: #223a55;
   font-size: 0.95rem;
+
   outline: none;
   backdrop-filter: blur(6px);
-  transition: 0.2s;
-  text-shadow: 0 0 4px rgba(0,180,255,0.6);
+  transition: 0.25s;
+
+  text-shadow: none;
 }
 
+/* フォーカス時 ネオン光 */
 .meta input:focus,
 .meta select:focus,
 .meta textarea:focus {
-  border-color: #00c0ff;
-  box-shadow: 0 0 12px rgba(0,180,255,0.6);
-  background: rgba(0,40,80,0.8);
+  border-color: #7fc4ff;
+  box-shadow: 0 0 12px rgba(150, 210, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .meta textarea {
-  min-height: 60px;
+  min-height: 70px;
   resize: vertical;
 }
 
+/* 操作ボタン部分 */
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
+/* 共通ボタン */
 .actions button {
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid rgb(0, 150, 255);
-  background: rgba(0,20,40,0.6);
-  color: #c0f0ff;
+  padding: 8px 14px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 0.85rem;
-  text-shadow: 0 0 4px rgba(0,180,255,0.7);
   transition: 0.2s;
+
+  /* ボタン基礎（薄ガラス） */
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(150, 200, 255, 0.7);
+  color: #214168;
 }
 
+/* ホバー時の光り方 */
 .actions button:hover {
-  background: rgba(0,30,60,0.9);
-  box-shadow: 0 0 14px rgba(0,180,255,0.8);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 12px rgba(150, 210, 255, 0.7);
+}
+
+/* 削除ボタンだけ淡い赤ネオン */
+.deleteBtn {
+  background: rgba(255, 160, 160, 0.28) !important;
+  border-color: rgba(255, 150, 150, 0.7) !important;
+  color: #8b2e2e !important;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 130, 130, 0.45) !important;
+  box-shadow: 0 0 12px rgba(255, 150, 150, 0.7) !important;
 }

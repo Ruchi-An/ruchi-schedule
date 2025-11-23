@@ -57,7 +57,7 @@ const RuchisukeEdit = ({ userId }) => {
     else setEditingEvent(null);
   };
 
-  const deleteEvent = async (no) => {
+  const handleDelete  = async (no) => {
     if (!no) return;
     const { error } = await supabase.from("schedule_list").delete().eq("no", no);
     if (error) console.error(error);
@@ -77,16 +77,17 @@ const RuchisukeEdit = ({ userId }) => {
           const ev = events.find(e => e.no === no);
           if (ev) setEditingEvent(ev);
         }}
-        onDelete={deleteEvent}
+        onDelete={handleDelete }
         editable
         userId={userId}
       />
 
-      <button className="btn-add-event" onClick={() => setEditingEvent({})}>予定追加</button>
+      <button className="btn-add-event" onClick={() => setEditingEvent({})}> + </button>
 
       {editingEvent && (
         <EventEditPopup
           event={editingEvent}
+          onDelete={handleDelete}
           onClose={() => setEditingEvent(null)}
           onSave={ev => {
             if (ev.no) updateEvent(ev);
