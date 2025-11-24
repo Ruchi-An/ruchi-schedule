@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./EventPopup.module.css"; // ★ CSSモジュールでスタイル適用
+import { parseInputTime } from "../utils/timeUtils.js";
 
 const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
   // ------------------------------
@@ -31,9 +32,9 @@ const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
         title: event.title || "",
         type: event.type || "",
         category: event.category || "",
-        date: event.date || "",
-        startTime: event.startTime || "",
-        endTime: event.endTime || "",
+        date: event.displayDate || event.date || null,
+        startTime: event.displayStartTime || event.startTime || null,
+        endTime: event.displayEndTime || event.endTime || null,
         summary: event.summary || "",
       });
     }
@@ -51,8 +52,32 @@ const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
   // 📌 保存ボタン押下時
   // ------------------------------
   const handleSave = () => {
-    onSave({ ...event, ...formData }); // ★ 元のeventデータに上書き
+    const rawStart = formData.startTime;   // "25:00"
+    const rawDate = formData.date;         // "2024-11-29"
+
+    const startParsed = parseInputTime(rawStart, rawDate);
+    const endParsed = formData.endTime
+      ? parseInputTime(formData.endTime, rawDate)
+      : { time: null, date: startParsed.date };
+
+    const payload = {
+      ...event,
+      ...formData,
+
+      // DB 用（正規化済み）
+      date: startParsed.date,
+      startTime: startParsed.time,
+      endTime: endParsed.time,
+
+      // 参照用（DB には保存しない）
+      displayDate: rawDate,           // "2024-11-29"
+      displayStartTime: rawStart,     // "25:00"
+      displayEndTime: formData.endTime || null, // もしあれば
+    };
+
+    onSave(payload);
   };
+
 
   // ------------------------------
   // 📌 削除ボタン押下時
@@ -97,12 +122,12 @@ const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
 
           {/* 時間 */}
           <input
-            type="time"
+            type="text"
             value={formData.startTime}
             onChange={(e) => handleChange("startTime", e.target.value)}
           />
           <input
-            type="time"
+            type="text"
             value={formData.endTime}
             onChange={(e) => handleChange("endTime", e.target.value)}
           />

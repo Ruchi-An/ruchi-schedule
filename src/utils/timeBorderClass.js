@@ -25,12 +25,10 @@ export const getBorderColorClass = (event) => {
  * @param {Object} ev - イベントオブジェクト
  * @param {string} ev.startTime - "HH:mm" または "HH:mm:ss"
  * @param {boolean} ev.allDay - 終日イベントか
- * @param {boolean} ev.sleep - 睡眠イベントか
  */
 export const getTimeBorderClass = (ev) => {
   if (!ev) return "borderOther";        // 無効なイベント
   if (ev.allDay) return "borderAllday"; // 終日イベント
-  if (ev.sleep) return "borderSleep";   // 睡眠イベント
   if (!ev.startTime) return "borderOther"; // 時間未設定
 
   // HH:mm:ss を HH:mm に分解

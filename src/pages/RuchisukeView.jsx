@@ -9,6 +9,8 @@ import CalendarLayout from "../components/CalendarLayout.jsx";      // ★ カ�
 import ScheduleListLayout from "../components/ScheduleListLayout.jsx"; // ★ リスト表示用コンポーネント
 import EventPopup from "../components/EventPopup.jsx";               // ★ イベント詳細ポップアップ用
 import { supabase } from "../services/supabaseClient.js";           // ★ Supabaseクライアント
+import { parseInputTime, displayTime } from "../utils/timeUtils";    // ★ 時間フォーマット用ユーティリティ
+
 
 const RuchisukeView = ({ userId }) => {
   // ------------------------------
@@ -16,48 +18,57 @@ const RuchisukeView = ({ userId }) => {
   // ------------------------------
   const [events, setEvents] = useState([]);         // ★ 取得したイベント一覧
   const [selectedEvent, setSelectedEvent] = useState(null); // ★ クリックされたイベント（ポップアップ表示用）
+  const [offDays, setOffDays] = useState([]);               // ★ offDay（日付文字列配列）
+
 
   // ------------------------------
   // 📌 イベント取得関数
   // ------------------------------
   const fetchEvents = async () => {
-    // SupabaseからユーザーIDに紐づくスケジュールを取得
     const { data, error } = await supabase
       .from("schedule_list")
       .select("*")
       .eq("user_id", userId)
-      .order("date", { ascending: true }); // 日付順に並び替え
+      .order("date", { ascending: true })
+      .order("startTime", { ascending: true });
 
-    if (error) {
-      console.error("Fetch events failed:", error); // ★ エラー時はコンソール表示
-    } else {
-      setEvents(data || []); // ★ データがない場合は空配列を設定
-    }
+    if (error) console.error(error); // ★ エラーがあればコンソール表示
+    else setEvents(data || []);      // ★ データがない場合は空配列
+  };
+
+  const fetchOffDays = async () => {
+    const { data, error } = await supabase
+      .from("days_status")
+      .select("date")
+      .eq("user_id", userId)
+      .eq("offDay", true);
+
+    if (error) console.error(error);
+    else setOffDays(data.map(d => d.date)); // YYYY-MM-DD配列
   };
 
   // ------------------------------
   // 📌 初回レンダリング & リアルタイム更新
   // ------------------------------
   useEffect(() => {
-    fetchEvents(); // 初回取得
+    fetchEvents();      // イベント取得
+    fetchOffDays();     // offDay取得（これだけで setOffDays する）
 
-    // Supabase Realtimeでスケジュール変更を監視
-    const channel = supabase
+    const eventChannel = supabase
       .channel("public:schedule_list")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "schedule_list" }, // ★ INSERT/UPDATE/DELETEを監視
-        () => fetchEvents() // 変更があれば再取得
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule_list" }, () => fetchEvents())
       .subscribe();
 
-    // コンポーネントアンマウント時にチャンネル削除
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId]); // ★ userIdが変わったら再実行
+    const offDayChannel = supabase
+      .channel("public:days_status")
+      .on("postgres_changes", { event: "*", schema: "public", table: "days_status" }, () => fetchOffDays())
+      .subscribe();
 
-  console.log("RuchisukeView events:", events); // ★ デバッグ用
+    return () => {
+      supabase.removeChannel(eventChannel);
+      supabase.removeChannel(offDayChannel);
+    };
+  }, [userId]);
 
   // ------------------------------
   // 📌 カレンダーのイベントクリック時
@@ -68,14 +79,31 @@ const RuchisukeView = ({ userId }) => {
   };
 
   // ------------------------------
+  // 📌 offDayチェックボックス変更時
+  // ------------------------------
+  const handleToggleOffDay = (dateStr) => {
+    setOffDays(prev => {
+      if (prev.includes(dateStr)) {
+        // 既にoffDayなら削除
+        return prev.filter(d => d !== dateStr);
+      } else {
+        // 新規追加
+        return [...prev, dateStr];
+      }
+    });
+  };
+
+  // ------------------------------
   // 📌 JSX描画部分
   // ------------------------------
   return (
     <div className="w-full max-w-[1600px] flex flex-col gap-6 mx-auto">
       {/* カレンダー表示 */}
-      <CalendarLayout 
-        events={events} 
-        onEventClick={handleEventClick} // ★ クリック時にポップアップを開く
+      <CalendarLayout
+        events={events}
+        onEventClick={handleEventClick}
+        offDays={offDays}       // ★ 背景ハイライトのみ反映
+        isEditable={false}      // ★ チェックボックス非表示
       />
 
       {/* スケジュールリスト表示（編集不可） */}
@@ -83,8 +111,8 @@ const RuchisukeView = ({ userId }) => {
 
       {/* 選択中イベントがある場合のみポップアップ表示 */}
       {selectedEvent && (
-        <EventPopup 
-          event={selectedEvent} 
+        <EventPopup
+          event={selectedEvent}
           onClose={() => setSelectedEvent(null)} // ★ 閉じる時にstateリセット
         />
       )}

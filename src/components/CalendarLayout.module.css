@@ -63,6 +63,25 @@
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
 }
 
+.addButton {
+  position: fixed;
+  top: 30px;
+  right: 32px;
+  padding: 12px 20px;
+  border-radius: 50%;
+  background: #06b6d4;
+  color: white;
+  box-shadow: 0 0 16px #06b6d4;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.addButton:hover {
+  transform: scale(1.05);
+}
+
+
 /* ============================= */
 /*        曜日ヘッダー           */
 /* ============================= */
@@ -122,12 +141,23 @@
 .calendarDay.sat .dayNumber {
   color: #4aa3ff;
 }
+
 .calendarDay.sun .dayNumber {
   color: #ff6b6b;
 }
+
 .calendarDay.holiday .dayNumber {
   color: #ff4b4b;
   font-weight: bold;
+}
+
+.offDay {
+  position: relative;
+  background: repeating-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.1) 2px,
+      rgba(255, 255, 255, 0.0) 2px,
+      rgba(255, 255, 255, 0.0) 6px);
 }
 
 /* ============================= */
@@ -164,29 +194,112 @@
 /* ============================= */
 /*      時間帯枠色（TimeColor）  */
 /* ============================= */
-.borderMorning { background: rgba(100, 230, 255, 0.15); border-color: rgba(100, 230, 255, 0.87); border-left:5px solid rgba(100,230,255,0.85); box-shadow:0 0 6px rgba(100,230,255,0.6); color:#fff;}
-.borderNoon { background: rgba(255, 230, 120, 0.13); border-color: rgba(255,230,120,0.7); border-left:4px solid rgba(255,230,120,0.85); box-shadow:0 0 6px rgba(255,230,120,0.6); color:#fff;}
-.borderNight { background: rgba(35, 125, 255, 0.18); border-color: rgba(35,125,255,0.7); border-left:5px solid rgba(35,125,255,0.85); box-shadow:0 0 6px rgba(0,81,255,0.6); color:#fff;}
-.borderMidnight { background: rgba(180,120,255,0.15); border-color: rgba(180,120,255,0.7); border-left:5px solid rgba(180,120,255,0.85); box-shadow:0 0 6px rgba(180,120,255,0.6); color:#fff;}
-.borderSleep { background: rgba(150,255,170,0.15); border-color: rgba(150,255,170,0.7); border-left:5px solid rgba(150,255,170,0.85); box-shadow:0 0 6px rgba(150,255,170,0.6); color:#fff;}
-.borderAllday { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.7); border-left:5px solid rgba(255,255,255,0.85); box-shadow:0 0 6px rgba(255,255,255,0.6); color:#fff;}
-.borderOther { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.7); border-left:5px solid rgba(255,255,255,0.85); box-shadow:0 0 6px rgba(255,255,255,255,0.6); color:#fff;}
+.borderMorning {
+  background: rgba(168, 230, 207, 0.15);
+  /* 薄いグリーン */
+  border-color: rgba(168, 230, 207, 0.87);
+  /* メインの枠線 */
+  border-left: 5px solid rgba(168, 230, 207, 0.85);
+  /* 左側強調 */
+  box-shadow: 0 0 6px rgba(168, 230, 207, 0.6);
+  /* ふんわり光る影 */
+  color: #fff;
+  /* 文字色は白のまま */
+}
+
+.borderNoon {
+  background: rgba(255, 230, 120, 0.13);
+  border-color: rgba(255, 230, 120, 0.7);
+  border-left: 4px solid rgba(255, 230, 120, 0.85);
+  box-shadow: 0 0 6px rgba(255, 230, 120, 0.6);
+  color: #fff;
+}
+
+.borderNight {
+  background: rgba(35, 125, 255, 0.18);
+  border-color: rgba(35, 125, 255, 0.7);
+  border-left: 5px solid rgba(35, 125, 255, 0.85);
+  box-shadow: 0 0 6px rgba(0, 81, 255, 0.6);
+  color: #fff;
+}
+
+.borderMidnight {
+  background: rgba(180, 120, 255, 0.15);
+  border-color: rgba(180, 120, 255, 0.7);
+  border-left: 5px solid rgba(180, 120, 255, 0.85);
+  box-shadow: 0 0 6px rgba(180, 120, 255, 0.6);
+  color: #fff;
+}
+
+.borderSleep {
+  background: rgba(150, 255, 170, 0.15);
+  border-color: rgba(150, 255, 170, 0.7);
+  border-left: 5px solid rgba(150, 255, 170, 0.85);
+  box-shadow: 0 0 6px rgba(150, 255, 170, 0.6);
+  color: #fff;
+}
+
+.borderAllday {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.7);
+  border-left: 5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+  color: #fff;
+}
+
+.borderOther {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.7);
+  border-left: 5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 255, 0.6);
+  color: #fff;
+}
 
 /* ============================= */
 /*        📱 スマホ最適化        */
 /* ============================= */
 @media (max-width: 480px) {
-  .calendarContainer { padding: 10px; }
-  .calendarWeekdays { font-size: 0.7rem; }
-  .calendarDay { padding: 4px; min-height: 3.5rem; }
-  .dayNumber { font-size: 0.9rem; }
-  .eventsList { font-size: 0.6rem; }
-  .calendarDays { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .calendarContainer {
+    padding: 10px;
+  }
+
+  .calendarWeekdays {
+    font-size: 0.7rem;
+  }
+
+  .calendarDay {
+    padding: 4px;
+    min-height: 3.5rem;
+  }
+
+  .dayNumber {
+    font-size: 0.9rem;
+  }
+
+  .eventsList {
+    font-size: 0.6rem;
+  }
+
+  .calendarDays {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 600px) {
-  .calendarDay { text-align: center; }
-  .calendarDay .eventsList { align-items: center; }
-  .calendarDay .eventItem { margin: 0 auto; }
-  .dayNumber { margin-left: 0; margin-right: 0; }
+  .calendarDay {
+    text-align: center;
+  }
+
+  .calendarDay .eventsList {
+    align-items: center;
+  }
+
+  .calendarDay .eventItem {
+    margin: 0 auto;
+  }
+
+  .dayNumber {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }

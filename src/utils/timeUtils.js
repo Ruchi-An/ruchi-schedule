@@ -27,7 +27,6 @@ export const toMinutes = (timeStr) => {
 export const getTimeZone = (timeStr) => {
   const min = toMinutes(timeStr);           // 分に変換
   if (min === null) return "other";        // 無効値は other
-
   if (min >= 360 && min <= 719) return "morning";    // 6:00〜11:59
   if (min >= 720 && min <= 1079) return "noon";      // 12:00〜17:59
   if (min >= 1080 && min <= 1439) return "night";    // 18:00〜23:59
@@ -48,19 +47,36 @@ export const displayTime = (time) => {
 };
 
 /**
- * 📌 入力文字列を HH:mm:ss 形式に変換（内部保存用）
- * "24:30" → "00:30:00" のように変換
- * @param {string} input - 入力文字列 "HH:mm"
- * @returns {string|null} "HH:mm:ss" 形式
+ * 📌 入力した時間を解析して
+ *   - DB保存用 time ("HH:mm:ss")
+ *   - 必要なら日付を翌日に変更して返す
+ *
+ * @param {string} inputTime - "HH:mm"
+ * @param {string} inputDate - "YYYY-MM-DD"
+ * @returns {{ time: string, date: string }}
  */
-export const parseInputTime = (input) => {
-  if (!input) return null;
-  const [hStr, mStr] = input.split(":");
+export const parseInputTime = (inputTime, inputDate) => {
+  if (!inputTime || !inputDate) {
+    return { time: null, date: inputDate };
+  }
+
+  let [hStr, mStr] = inputTime.split(":");
   let h = parseInt(hStr, 10);
   const m = parseInt(mStr || "0", 10);
+  let date = inputDate;
 
-  // 24〜29 時は 0〜5 に変換（内部保存用）
-  if (h >= 24 && h < 30) h -= 24;
+  // 24〜29 時は翌日扱い
+  if (h >= 24 && h < 30) {
+    h -= 24;
 
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
+    // 翌日へ
+    const d = new Date(inputDate);
+    d.setDate(d.getDate() + 1);
+    date = d.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
+  //const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
+  const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+
+  return { time, date };
 };

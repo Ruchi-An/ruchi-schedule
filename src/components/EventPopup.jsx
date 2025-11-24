@@ -51,16 +51,15 @@ const EventPopup = ({ event, onClose }) => {
           {/* 日付 */}
           <div>
             <strong>日付：</strong>
-            {event.date || "未定"}
+            {event.displayDate || "未定"}
           </div>
 
           {/* 時間 */}
           <div>
             <strong>時間：</strong>
-            {event.startTime
-              ? `${formatTime(event.startTime)}${
-                  event.endTime ? ` 〜 ${formatTime(event.endTime)}` : ""
-                }`
+            {event.displayStartTime
+              ? `${event.displayStartTime}${event.displayEndTime ? ` 〜 ${event.displayEndTime}` : ""
+              }`
               : "なし"}
           </div>
 
