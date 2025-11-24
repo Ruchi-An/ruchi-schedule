@@ -72,34 +72,59 @@ const RuchisukeEdit = ({ userId }) => {
   }, [userId]);
 
   // ------------------------------
-  // 📌 新規イベント追加
+  // 📌 新規イベント追加（修正版）
   // ------------------------------
   const saveNewEvent = async (ev) => {
+    // startTime / endTime を parseInputTime で HH:mm:ss に変換
+    const startParsed = ev.startTime
+      ? parseInputTime(ev.startTime, ev.date)
+      : { time: null, date: ev.date || null };
+
+    const endParsed = ev.endTime
+      ? parseInputTime(ev.endTime, ev.date)
+      : { time: null, date: startParsed.date };
+
     const payload = {
       ...ev,
-      startTime: parseInputTime(ev.startTime) || null,
-      endTime: parseInputTime(ev.endTime) || null,
+
+      // DB 用
+      startTime: startParsed.time,
+      endTime: endParsed.time,
+      date: startParsed.date,
+
+      // ユーザーID・フラグ
       user_id: userId,
       allDay: ev.allDay || false,
     };
 
     const { error } = await supabase.from("schedule_list").insert([payload]);
     if (error) console.error(error);
-    else setEditingEvent(null); // ★ 保存後ポップアップ閉じる
+    else setEditingEvent(null); // 保存後ポップアップ閉じる
   };
 
   // ------------------------------
   // 📌 既存イベント更新
   // ------------------------------
   const updateEvent = async (ev) => {
-    const payload = { ...ev }; // ★ 変更データ
+    const payload = {
+      ...ev,
+      date: ev.date && ev.date !== "" ? ev.date : null,
+      startTime: ev.startTime
+        ? parseInputTime(ev.startTime, ev.date).time
+        : null,
+      endTime: ev.endTime
+        ? parseInputTime(ev.endTime, ev.date).time
+        : null,
+      allDay: ev.allDay || false,
+    };
+
     const { error } = await supabase
       .from("schedule_list")
       .update(payload)
-      .eq("no", ev.no);        // ★ イベント番号で特定
+      .eq("no", ev.no);
 
     if (error) console.error(error);
-    else setEditingEvent(null); // ★ 更新後ポップアップ閉じる
+    else setEditingEvent(null);
   };
 
   // ------------------------------

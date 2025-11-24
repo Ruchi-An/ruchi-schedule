@@ -75,8 +75,7 @@ export const parseInputTime = (inputTime, inputDate) => {
     date = d.toISOString().slice(0, 10); // YYYY-MM-DD
   }
 
-  //const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
-  const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
 
   return { time, date };
 };

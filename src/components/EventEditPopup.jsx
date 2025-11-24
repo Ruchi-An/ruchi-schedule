@@ -52,32 +52,34 @@ const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
   // 📌 保存ボタン押下時
   // ------------------------------
   const handleSave = () => {
-    const rawStart = formData.startTime;   // "25:00"
-    const rawDate = formData.date;         // "2024-11-29"
+    const rawStart = formData.startTime; // "22:00" など
+    const rawEnd = formData.endTime;
+    const rawDate = formData.date;
 
-    const startParsed = parseInputTime(rawStart, rawDate);
-    const endParsed = formData.endTime
-      ? parseInputTime(formData.endTime, rawDate)
-      : { time: null, date: startParsed.date };
+    // startTime は入力済みならパース
+    const startParsed = rawStart ? parseInputTime(rawStart, rawDate) : null;
+
+    // endTime は未入力なら null
+    const endParsed = rawEnd && rawEnd.trim() !== "" ? parseInputTime(rawEnd, rawDate) : null;
 
     const payload = {
       ...event,
       ...formData,
 
-      // DB 用（正規化済み）
-      date: startParsed.date,
-      startTime: startParsed.time,
-      endTime: endParsed.time,
+      // DB 用（HH:mm:ss に正規化、null も可）
+      date: startParsed?.date || rawDate,
+      startTime: startParsed?.time || null,
+      endTime: endParsed?.time || null,
 
-      // 参照用（DB には保存しない）
-      displayDate: rawDate,           // "2024-11-29"
-      displayStartTime: rawStart,     // "25:00"
-      displayEndTime: formData.endTime || null, // もしあれば
+      // 参照用（文字列そのまま）
+      displayDate: rawDate || null,
+      displayStartTime: rawStart || null,
+      displayEndTime: rawEnd || null,
     };
 
+    console.log("payload:", payload); // 確認用
     onSave(payload);
   };
-
 
   // ------------------------------
   // 📌 削除ボタン押下時
