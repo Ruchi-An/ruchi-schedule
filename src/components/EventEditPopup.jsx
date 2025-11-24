@@ -1,7 +1,17 @@
+// ------------------------------
+// 📌 EventEditPopup.jsx
+// イベントの編集・新規作成用ポップアップコンポーネント
+// タイトル・日付・時間・タイプ・カテゴリ・詳細を入力できる
+// 保存 / 削除 / キャンセルボタン付き
+// ------------------------------
+
 import React, { useState, useEffect } from "react";
-import styles from "./EventPopup.module.css";
+import styles from "./EventPopup.module.css"; // ★ CSSモジュールでスタイル適用
 
 const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
+  // ------------------------------
+  // 📌 フォーム入力用 state
+  // ------------------------------
   const [formData, setFormData] = useState({
     title: "",
     type: "",
@@ -12,44 +22,63 @@ const EventEditPopup = ({ event, onClose, onSave, onDelete }) => {
     summary: "",
   });
 
+  // ------------------------------
+  // 📌 eventが変更されたらフォームにセット
+  // ------------------------------
   useEffect(() => {
     if (event) {
       setFormData({
         title: event.title || "",
         type: event.type || "",
         category: event.category || "",
-        date: event.date || null,
-        startTime: event.startTime || null,
-        endTime: event.endTime || null,
+        date: event.date || "",
+        startTime: event.startTime || "",
+        endTime: event.endTime || "",
         summary: event.summary || "",
       });
     }
   }, [event]);
 
+  // ------------------------------
+  // 📌 フォーム入力値変更時
+  // key: 更新するフィールド名, value: 入力値
+  // ------------------------------
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  // ------------------------------
+  // 📌 保存ボタン押下時
+  // ------------------------------
   const handleSave = () => {
-    onSave({ ...event, ...formData });
+    onSave({ ...event, ...formData }); // ★ 元のeventデータに上書き
   };
 
-const handleDelete = () => {
-  if (typeof onDelete === "function") {
-    onDelete(event.no);
-  } else {
-    console.warn("onDelete is not a function");
-  }
-  onClose();
-};
+  // ------------------------------
+  // 📌 削除ボタン押下時
+  // ------------------------------
+  const handleDelete = () => {
+    if (typeof onDelete === "function") {
+      onDelete(event.no); // ★ イベント番号を渡して削除
+    } else {
+      console.warn("onDelete is not a function");
+    }
+    onClose(); // ★ 削除後ポップアップを閉じる
+  };
 
+  // ------------------------------
+  // 📌 JSX描画
+  // ------------------------------
   return (
     <div className={styles.popupOverlay} onClick={onClose}>
+      {/* ★ ポップアップボックスクリックは閉じない */}
       <div className={styles.popupBox} onClick={(e) => e.stopPropagation()}>
+        {/* ヘッダー */}
         <h3 className={styles.title}>
           {event?.title ? `編集: ${event.title}` : "新規作成"}
         </h3>
 
+        {/* 入力フォーム */}
         <div className={styles.meta}>
           {/* タイトル */}
           <input
@@ -59,14 +88,14 @@ const handleDelete = () => {
             onChange={(e) => handleChange("title", e.target.value)}
           />
 
-          {/* 日付入力 */}
+          {/* 日付 */}
           <input
             type="date"
             value={formData.date}
             onChange={(e) => handleChange("date", e.target.value)}
           />
 
-          {/* 時間入力 */}
+          {/* 時間 */}
           <input
             type="time"
             value={formData.startTime}
@@ -83,7 +112,7 @@ const handleDelete = () => {
             value={formData.type}
             onChange={(e) => {
               handleChange("type", e.target.value);
-              handleChange("category", "");
+              handleChange("category", ""); // ★ タイプ変更でカテゴリリセット
             }}
           >
             <option value="">選択してください</option>
@@ -92,13 +121,14 @@ const handleDelete = () => {
             <option value="real">🌏リアル</option>
           </select>
 
-          {/* カテゴリ選択（タイプ依存） */}
+          {/* カテゴリ選択（タイプに応じて表示） */}
           <select
             value={formData.category}
             onChange={(e) => handleChange("category", e.target.value)}
           >
             <option value="">選択してください</option>
 
+            {/* ゲームカテゴリ */}
             {formData.type === "game" && (
               <>
                 <option value="🤪">🤪</option>
@@ -116,6 +146,7 @@ const handleDelete = () => {
               </>
             )}
 
+            {/* シナリオカテゴリ */}
             {formData.type === "scenario" && (
               <>
                 <option value="📕">📕</option>
@@ -125,10 +156,11 @@ const handleDelete = () => {
               </>
             )}
 
+            {/* リアルカテゴリ */}
             {formData.type === "real" && <option value="🌏">🌏</option>}
           </select>
 
-          {/* サマリー */}
+          {/* 詳細サマリー */}
           <textarea
             placeholder="詳細"
             value={formData.summary}
@@ -136,8 +168,9 @@ const handleDelete = () => {
           />
         </div>
 
-        {/* 保存 / キャンセル / 削除ボタン */}
+        {/* ボタン類 */}
         <div className={styles.actions}>
+          {/* 削除ボタン（既存イベントのみ） */}
           {event && (
             <button
               style={{
@@ -151,6 +184,7 @@ const handleDelete = () => {
             </button>
           )}
 
+          {/* 保存 / キャンセル */}
           <div style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
             <button onClick={handleSave}>保存</button>
             <button onClick={onClose}>キャンセル</button>

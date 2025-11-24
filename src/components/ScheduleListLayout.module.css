@@ -33,7 +33,7 @@
 .schedulelistItem {
   position: relative;
   background: transparent;
-  border: 1px solid currentColor;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   padding: 10px;       /* ←少し小さく */
   border-radius: 10px; /* ←小さめ */
   display: flex;
